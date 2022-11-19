@@ -3,11 +3,11 @@
 open System
 
 type Value =
-    | String of string
-    | Timestamp of DateTimeOffset
-    | Integer of int64
-    | Float of double
-    | Boolean of bool
+    | OcelString of string
+    | OcelTimestamp of DateTimeOffset
+    | OcelInteger of int64
+    | OcelFloat of double
+    | OcelBoolean of bool
 
 type Attributes = Map<string, Value>
 
@@ -31,10 +31,8 @@ type GlobalLog = {
     ObjectTypes: string seq
 }
 
-type OcelLog = {
+type Log = {
     GlobalLog: GlobalLog
-    GlobalEvent: Event
-    GlobalObject: Object
     Events: Event seq
     Objects: Object seq
 }
