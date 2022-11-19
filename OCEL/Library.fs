@@ -12,7 +12,7 @@ module Json =
     let private SchemaJson = """{"$schema":"http://json-schema.org/schema#","additionalProperties":true,"definitions":{"AttributeBooleanType":{"type":"boolean"},"AttributeDateType":{"type":"string","format":"date-time"},"AttributeFloatType":{"type":"number"},"AttributeIntType":{"type":"integer"},"AttributeStringType":{"type":"string"},"ObjectMappingType":{"type":"object"},"ValueMappingType":{"type":"object"},"EventType":{"properties":{"ocel:id":{"$ref":"#/definitions/AttributeStringType"},"ocel:activity":{"$ref":"#/definitions/AttributeStringType"},"ocel:timestamp":{"$ref":"#/definitions/AttributeDateType"},"ocel:vmap":{"items":{"$ref":"#/definitions/ValueMappingType"},"type":"object"},"ocel:omap":{"type":"array"}},"required":["ocel:id","ocel:activity","ocel:timestamp","ocel:omap","ocel:vmap"],"type":"object"},"ObjectType":{"properties":{"ocel:id":{"$ref":"#/definitions/AttributeStringType"},"ocel:type":{"$ref":"#/definitions/AttributeStringType"},"ocel:ovmap":{"items":{"$ref":"#/definitions/ValueMappingType"},"type":"object"}},"required":["ocel:id","ocel:type","ocel:ovmap"],"type":"object"}},"description":"Schema for the JSON-OCEL implementation","properties":{"ocel:events":{"items":{"$ref":"#/definitions/EventType"},"type":"object"},"ocel:objects":{"items":{"$ref":"#/definitions/ObjectMappingType"},"type":"object"}},"type":"object"}"""
     let private Schema = JSchema.Parse(SchemaJson)
 
-    let private extractAttributes (props: IJEnumerable<JProperty>) : Attributes =
+    let private extractAttributes (props: IJEnumerable<JProperty>) : OcelAttributes =
         props
         |> Seq.filter (fun p -> p.Name <> "ocel:attribute-names" && p.Name <> "ocel:object-types")
         |> Seq.map (fun p ->
@@ -35,9 +35,8 @@ module Json =
         | Some p when p.First = null || p.First.Type <> JTokenType.Array -> failwith $"Propery \"{name}\" is not an array."
         | Some p -> p.First |> Seq.map (fun x -> x.Value<string>())
 
-    let private extractGlobalLog (jObj: JObject) : GlobalLog option =
-        let jGlobalLog = jObj["ocel:global-log"] |> Option.ofObj
-        match jGlobalLog with
+    let private extractGlobalLog (jObj: JObject) : OcelLogInfo option =
+        match jObj["ocel:global-log"] |> Option.ofObj with
         | None -> None
         | Some token ->
             let props = token.Children<JProperty>()
@@ -46,6 +45,28 @@ module Json =
                 AttributeNames = extractStringArray props "ocel:attribute-names"
                 ObjectTypes = extractStringArray props "ocel:object-types"
             }
+
+    let private extractEvents (jObj: JObject) : OcelEvent seq =
+        match jObj["ocel:events"] |> Option.ofObj with
+        | None -> failwith """No "ocel:events" defined."""
+        | Some token ->
+            token.Children<JProperty>()
+            |> Seq.map (fun p ->
+                match p.First |> Option.ofObj with
+                | None -> failwith $"Property {p.Name} does not have a value."
+                | Some t ->
+                    let props = t.Children<JProperty>()
+                    {
+                        Id = p.Name
+                        Activity = ""
+                        Timestamp = DateTimeOffset.UtcNow
+                        OMap = []
+                        VMap = Map.empty
+                    }
+            )
+
+    let private extractObjects (jObj: JObject) : OcelObject seq =
+        []
 
     let Validate json =
         JObject.Parse(json).IsValid Schema
@@ -59,19 +80,19 @@ module Json =
         let jObj = JObject.Parse json
         ValidateJObjectWithErrorMessages jObj
 
-    let Deserialize json : Log =
+    let Deserialize json : OcelLog =
         let jObj = JObject.Parse json
         match ValidateJObjectWithErrorMessages jObj with
         | false, errors -> failwith $"JSON not validated by schema. Errors: {errors |> Seq.map (fun e -> e + Environment.NewLine)}."
         | true, _ ->
             {
-                GlobalLog =
+                LogInfo =
                     match extractGlobalLog jObj with
                     | Some globalLog -> globalLog
                     | None -> failwith """No "ocel:global-log" defined."""
-                Events = []
-                Objects = []
+                Events = extractEvents jObj
+                Objects = extractObjects jObj
             }
     
-    let Serialize (log: Log) : string =
+    let Serialize (log: OcelLog) : string =
         ""

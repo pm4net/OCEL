@@ -2,37 +2,37 @@
 
 open System
 
-type Value =
+type OcelValue =
     | OcelString of string
     | OcelTimestamp of DateTimeOffset
     | OcelInteger of int64
     | OcelFloat of double
     | OcelBoolean of bool
 
-type Attributes = Map<string, Value>
+type OcelAttributes = Map<string, OcelValue>
 
-type Event = {
+type OcelEvent = {
     Id: string
     Activity: string
     Timestamp: DateTimeOffset
     OMap: string seq
-    VMap: Attributes
+    VMap: OcelAttributes
 }
 
-type Object = {
+type OcelObject = {
     Id: string
     Type: string
-    OvMap: Attributes
+    OvMap: OcelAttributes
 }
 
-type GlobalLog = {
-    Attributes: Attributes
+type OcelLogInfo = {
+    Attributes: OcelAttributes
     AttributeNames: string seq
     ObjectTypes: string seq
 }
 
-type Log = {
-    GlobalLog: GlobalLog
-    Events: Event seq
-    Objects: Object seq
+type OcelLog = {
+    LogInfo: OcelLogInfo
+    Events: OcelEvent seq
+    Objects: OcelObject seq
 }
