@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OCEL", "OCEL\OCEL.csproj", "{75057094-D352-428A-A304-44779F70F434}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Schemas", "Schemas", "{F22BFFD9-5211-400A-8BFB-B21B221FA789}"
 	ProjectSection(SolutionItems) = preProject
 		Schemas\schema.json = Schemas\schema.json
@@ -22,9 +20,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonSchemaToCSharpClass", "Generator\JsonSchemaToCSharpClass.csproj", "{D2892C41-A074-470D-AD9C-B7DADB6ED26E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OCEL.Tests", "OCEL.Tests\OCEL.Tests.csproj", "{7238D3A2-7580-4A80-BB7D-8134546FC043}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OCEL.Tests", "OCEL.Tests\OCEL.Tests.csproj", "{7238D3A2-7580-4A80-BB7D-8134546FC043}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OCEL_CSharp", "OCEL_CSharp\OCEL_CSharp.csproj", "{34A98CC0-CDE4-45FD-A470-BF031705BD93}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "OCEL", "OCEL\OCEL.fsproj", "{20B92918-9B96-4CCD-843D-497F5E3C8359}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,18 +32,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{75057094-D352-428A-A304-44779F70F434}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75057094-D352-428A-A304-44779F70F434}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{75057094-D352-428A-A304-44779F70F434}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75057094-D352-428A-A304-44779F70F434}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D2892C41-A074-470D-AD9C-B7DADB6ED26E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D2892C41-A074-470D-AD9C-B7DADB6ED26E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D2892C41-A074-470D-AD9C-B7DADB6ED26E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D2892C41-A074-470D-AD9C-B7DADB6ED26E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7238D3A2-7580-4A80-BB7D-8134546FC043}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7238D3A2-7580-4A80-BB7D-8134546FC043}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7238D3A2-7580-4A80-BB7D-8134546FC043}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7238D3A2-7580-4A80-BB7D-8134546FC043}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34A98CC0-CDE4-45FD-A470-BF031705BD93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34A98CC0-CDE4-45FD-A470-BF031705BD93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34A98CC0-CDE4-45FD-A470-BF031705BD93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34A98CC0-CDE4-45FD-A470-BF031705BD93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20B92918-9B96-4CCD-843D-497F5E3C8359}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20B92918-9B96-4CCD-843D-497F5E3C8359}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20B92918-9B96-4CCD-843D-497F5E3C8359}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20B92918-9B96-4CCD-843D-497F5E3C8359}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
