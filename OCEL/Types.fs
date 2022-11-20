@@ -12,7 +12,6 @@ type OcelValue =
 type OcelAttributes = Map<string, OcelValue>
 
 type OcelEvent = {
-    Id: string
     Activity: string
     Timestamp: DateTimeOffset
     OMap: string seq
@@ -20,7 +19,6 @@ type OcelEvent = {
 }
 
 type OcelObject = {
-    Id: string
     Type: string
     OvMap: OcelAttributes
 }
@@ -33,6 +31,25 @@ type OcelLogInfo = {
 
 type OcelLog = {
     LogInfo: OcelLogInfo
-    Events: OcelEvent seq
-    Objects: OcelObject seq
+    Events: Map<string, OcelEvent>
+    Objects: Map<string, OcelObject>
 }
+
+// Validations
+
+type OcelLog with
+    member this.IsValid() =
+        let doObjectTypesMatchLogInfo =
+            let distinctObjectTypes = 
+                this.Objects
+                |> Seq.map (fun o -> o.Value.Type)
+                |> Set.ofSeq
+
+            this.LogInfo.ObjectTypes
+            |> Set.ofSeq = distinctObjectTypes
+
+        let areAllAttributesInEventsAndObjectsInLogInfo =
+            true // TODO
+
+        doObjectTypesMatchLogInfo &&
+        areAllAttributesInEventsAndObjectsInLogInfo
