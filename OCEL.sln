@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Schemas", "Schemas", "{F22B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{7D108089-3A23-4E2F-8F6C-44CBC106D439}"
 	ProjectSection(SolutionItems) = preProject
+		Samples\github_pm4py.jsonocel = Samples\github_pm4py.jsonocel
 		Samples\minimal.jsonocel = Samples\minimal.jsonocel
 		Samples\minimal.xmlocel = Samples\minimal.xmlocel
 	EndProjectSection
@@ -20,11 +21,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OCEL_CSharp", "OCEL_CSharp\OCEL_CSharp.csproj", "{34A98CC0-CDE4-45FD-A470-BF031705BD93}"
-EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "OCEL", "OCEL\OCEL.fsproj", "{20B92918-9B96-4CCD-843D-497F5E3C8359}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "OcelTests", "OcelTests\OcelTests.fsproj", "{54D13BAC-E447-469F-B0B6-1022FDBDDCDD}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "OcelTests", "OcelTests\OcelTests.fsproj", "{54D13BAC-E447-469F-B0B6-1022FDBDDCDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,10 +31,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{34A98CC0-CDE4-45FD-A470-BF031705BD93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{34A98CC0-CDE4-45FD-A470-BF031705BD93}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{34A98CC0-CDE4-45FD-A470-BF031705BD93}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{34A98CC0-CDE4-45FD-A470-BF031705BD93}.Release|Any CPU.Build.0 = Release|Any CPU
 		{20B92918-9B96-4CCD-843D-497F5E3C8359}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{20B92918-9B96-4CCD-843D-497F5E3C8359}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20B92918-9B96-4CCD-843D-497F5E3C8359}.Release|Any CPU.ActiveCfg = Release|Any CPU

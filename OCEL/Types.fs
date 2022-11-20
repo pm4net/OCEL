@@ -60,3 +60,15 @@ type OcelLog with
         this.Events
         |> Map.toSeq
         |> Seq.sortBy (fun (_, v) -> v.Timestamp)
+
+    /// Indicates whether the log is valid according to the OCEL specification
+    member this.IsValid =
+        /// Objects that are referenced by events must exist
+        let doAllObjectsReferencedInEventsExist =
+            this.Events
+            |> Seq.forall 
+                (fun e -> 
+                    e.Value.OMap
+                    |> Seq.forall (fun o -> this.Objects.TryFind o <> None))
+
+        doAllObjectsReferencedInEventsExist
