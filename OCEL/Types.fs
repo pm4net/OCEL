@@ -32,29 +32,31 @@ type OcelLog = {
 // Extending types with properties and functions
 
 type OcelLog with
+    /// The set of all attribute names used in both events and objects in the log
     member this.AttributeNames =
-        Set.ofSeq [""]
+        let eventAttributes =
+            this.Events
+            |> Map.toSeq
+            |> Seq.map (fun (_, v) -> v.VMap.Keys)
+            |> Seq.concat
 
+        let objectAttributes =
+            this.Objects
+            |> Map.toSeq
+            |> Seq.map (fun (_, v) -> v.OvMap.Keys)
+            |> Seq.concat
+        
+        Set.ofSeq eventAttributes + Set.ofSeq objectAttributes
+
+    /// The set of all object types in the log
     member this.ObjectTypes =
-        Set.ofSeq [""]
+        this.Objects
+        |> Map.toSeq
+        |> Seq.map (fun (_, v) -> v.Type)
+        |> Set.ofSeq
 
     /// The list of events and their ID's, ordered by their timestamp
     member this.OrderedEvents =
         this.Events
         |> Map.toSeq
         |> Seq.sortBy (fun (_, v) -> v.Timestamp)
-
-    member this.IsValid() =
-        let doObjectTypesMatchLogInfo =
-            let distinctObjectTypes = 
-                this.Objects
-                |> Seq.map (fun o -> o.Value.Type)
-                |> Set.ofSeq
-
-            this.ObjectTypes = distinctObjectTypes
-
-        let areAllAttributesInEventsAndObjectsInLogInfo =
-            true // TODO
-            
-        doObjectTypesMatchLogInfo &&
-        areAllAttributesInEventsAndObjectsInLogInfo
