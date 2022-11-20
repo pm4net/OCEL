@@ -23,21 +23,27 @@ type OcelObject = {
     OvMap: OcelAttributes
 }
 
-type OcelLogInfo = {
-    Attributes: OcelAttributes
-    AttributeNames: string seq
-    ObjectTypes: string seq
-}
-
 type OcelLog = {
-    LogInfo: OcelLogInfo
+    GlobalAttributes: OcelAttributes
     Events: Map<string, OcelEvent>
     Objects: Map<string, OcelObject>
 }
 
-// Validations
+// Extending types with properties and functions
 
 type OcelLog with
+    member this.AttributeNames =
+        Set.ofSeq [""]
+
+    member this.ObjectTypes =
+        Set.ofSeq [""]
+
+    /// The list of events and their ID's, ordered by their timestamp
+    member this.OrderedEvents =
+        this.Events
+        |> Map.toSeq
+        |> Seq.sortBy (fun (_, v) -> v.Timestamp)
+
     member this.IsValid() =
         let doObjectTypesMatchLogInfo =
             let distinctObjectTypes = 
@@ -45,11 +51,10 @@ type OcelLog with
                 |> Seq.map (fun o -> o.Value.Type)
                 |> Set.ofSeq
 
-            this.LogInfo.ObjectTypes
-            |> Set.ofSeq = distinctObjectTypes
+            this.ObjectTypes = distinctObjectTypes
 
         let areAllAttributesInEventsAndObjectsInLogInfo =
             true // TODO
-
+            
         doObjectTypesMatchLogInfo &&
         areAllAttributesInEventsAndObjectsInLogInfo
