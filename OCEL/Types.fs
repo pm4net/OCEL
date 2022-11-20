@@ -1,6 +1,11 @@
 ﻿namespace OCEL.Types
 
 open System
+open System.Runtime.CompilerServices
+
+// Make internal properties available to the C# project
+[<assembly: InternalsVisibleTo("OCEL.Csharp")>]
+do()
 
 type OcelValue =
     | OcelString of string
@@ -72,3 +77,10 @@ type OcelLog with
                     |> Seq.forall (fun o -> this.Objects.TryFind o <> None))
 
         doAllObjectsReferencedInEventsExist
+
+/// Contains helper functions to convert to standard C# types
+module Converters =
+    let internal ToStandardDictionary map =
+        map
+        :> System.Collections.Generic.IDictionary<_,_>
+        |> System.Collections.Generic.Dictionary
