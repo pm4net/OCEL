@@ -9,6 +9,9 @@ open Newtonsoft.Json.Schema
 open Newtonsoft.Json.Linq
 
 module Json =
+
+    (* --- PRIVATE MEMBERS --- *)
+
     [<Literal>]
     let private SchemaJson = """{"$schema":"http://json-schema.org/schema#","additionalProperties":true,"definitions":{"AttributeBooleanType":{"type":"boolean"},"AttributeDateType":{"type":"string","format":"date-time"},"AttributeFloatType":{"type":"number"},"AttributeIntType":{"type":"integer"},"AttributeStringType":{"type":"string"},"ObjectMappingType":{"type":"object"},"ValueMappingType":{"type":"object"},"EventType":{"properties":{"ocel:id":{"$ref":"#/definitions/AttributeStringType"},"ocel:activity":{"$ref":"#/definitions/AttributeStringType"},"ocel:timestamp":{"$ref":"#/definitions/AttributeDateType"},"ocel:vmap":{"items":{"$ref":"#/definitions/ValueMappingType"},"type":"object"},"ocel:omap":{"type":"array"}},"required":["ocel:id","ocel:activity","ocel:timestamp","ocel:omap","ocel:vmap"],"type":"object"},"ObjectType":{"properties":{"ocel:id":{"$ref":"#/definitions/AttributeStringType"},"ocel:type":{"$ref":"#/definitions/AttributeStringType"},"ocel:ovmap":{"items":{"$ref":"#/definitions/ValueMappingType"},"type":"object"}},"required":["ocel:id","ocel:type","ocel:ovmap"],"type":"object"}},"description":"Schema for the JSON-OCEL implementation","properties":{"ocel:events":{"items":{"$ref":"#/definitions/EventType"},"type":"object"},"ocel:objects":{"items":{"$ref":"#/definitions/ObjectMappingType"},"type":"object"}},"type":"object"}"""
     let private Schema = JSchema.Parse(SchemaJson)
@@ -26,7 +29,7 @@ module Json =
     let private extractTokenFromProperties props propName eventId =
         match extractOptionalTokenFromProperties props propName with
         | Some token -> token
-        | None -> failwith $"Token \"{propName}\" is either not defined or has no value for event \"{eventId}\""
+        | None -> failwith $"Object \"{eventId}\" is either not defined or has no value for \"{propName}\""
 
     /// Extract the value from a token and cast it into one of the supported OCEL types, otherwise throw an error.
     let private extractValueFromToken (token: JToken) =
@@ -106,26 +109,28 @@ module Json =
         reader.DateParseHandling <- DateParseHandling.DateTimeOffset
         JObject.Load reader
 
-    /// Validate a JSON string against the OCEL JSON schema
-    let Validate json =
-        (ParseWithDateTimeOffsetHandling json).IsValid Schema
-
     /// Validate a JSON string against the OCEL JSON schema, with error messages
     let private ValidateJObjectWithErrorMessages (jObj: JObject) =
         let mutable errors : System.Collections.Generic.IList<string> = Array.empty
         let valid = jObj.IsValid(Schema, &errors)
         (valid, errors :> seq<_>)
 
-    /// Validate a JSON string against the OCEL JSON schema, with error messages
+    (* --- PUBLIC MEMBERS --- *)
+
+    /// Validate a JSON string against the OCEL JSON schema, with error messages.
     let ValidateWithErrorMessages json =
         let jObj = ParseWithDateTimeOffsetHandling json
         ValidateJObjectWithErrorMessages jObj
+
+    /// Validate a JSON string against the OCEL JSON schema.
+    let Validate json =
+        (ParseWithDateTimeOffsetHandling json).IsValid Schema
 
     /// Deserialize a JSON string into an OCEL log, and validate it against the OCEL schema.
     let Deserialize json =
         let jObj = ParseWithDateTimeOffsetHandling json
         match ValidateJObjectWithErrorMessages jObj with
-        | false, errors -> failwith $"JSON not validated by schema. Errors: {errors |> Seq.map (fun e -> e + Environment.NewLine)}."
+        | false, errors -> failwith $"""JSON not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat ", "}."""
         | true, _ ->
             {
                 GlobalAttributes = extractAttributesFromGlobalLog jObj
@@ -133,6 +138,6 @@ module Json =
                 Objects = extractObjects jObj
             }
     
-    /// Serialize an OCEL log into a JSON string
+    /// Serialize an OCEL log into a JSON string.
     let Serialize (log: OcelLog) : string =
         ""

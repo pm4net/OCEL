@@ -3,10 +3,6 @@
 open System
 open System.Runtime.CompilerServices
 
-// Make internal properties available to the C# project
-[<assembly: InternalsVisibleTo("OCEL.CSharp")>]
-do()
-
 type OcelValue =
     | OcelString of string
     | OcelTimestamp of DateTimeOffset
@@ -77,10 +73,3 @@ type OcelLog with
                     |> Seq.forall (fun o -> this.Objects.TryFind o <> None))
 
         doAllObjectsReferencedInEventsExist
-
-/// Contains helper functions to convert to standard C# types
-module internal Converters =
-    let internal ToStandardDictionary map =
-        map
-        :> System.Collections.Generic.IDictionary<_,_>
-        |> System.Collections.Generic.Dictionary

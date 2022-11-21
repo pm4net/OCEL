@@ -18,15 +18,9 @@ namespace OCEL.CSharp
 
         internal OcelLog(OCEL.Types.OcelLog log)
         {
-            GlobalAttributes = Converters.ToStandardDictionary(log.GlobalAttributes);
-            Events = Converters
-                .ToStandardDictionary(log.Events)
-                .ToDictionary(
-                    k => k.Key, 
-                    v => new OcelEvent(
-                        v.Value.Activity, v.Value.Timestamp,
-                        v.Value.OMap, Converters.ToStandardDictionary(v.Value.VMap)));
-            Objects = null; // TODO
+            GlobalAttributes = log.GlobalAttributes.ToExplicitDictionary();
+            Events = log.Events.ToDictionary(k => k.Key, v => new OcelEvent(v.Value));
+            Objects = log.Objects.ToDictionary(k => k.Key, v => new OcelObject(v.Value));
         }
 
         public IDictionary<string, OcelValue> GlobalAttributes { get; set; }
@@ -35,11 +29,28 @@ namespace OCEL.CSharp
 
         public IDictionary<string, OcelObject> Objects { get; set; }
 
-        public ISet<string> AttributeNames => new HashSet<string>();
+        /// <summary>
+        /// The set of all attribute names used in both events and objects in the log
+        /// </summary>
+        public ISet<string> AttributeNames =>
+            new HashSet<string>(
+                Events.SelectMany(e => e.Value.VMap.Keys).Union(
+                    Objects.SelectMany(o => o.Value.OvMap.Keys)));
 
-        public ISet<string> ObjectTypes => new HashSet<string>();
+        /// <summary>
+        /// The set of all object types in the log
+        /// </summary>
+        public ISet<string> ObjectTypes => new HashSet<string>(Objects.Select(o => o.Value.Type));
 
-        public bool IsValid => true;
+        /// <summary>
+        /// The list of events and their ID's, ordered by their timestamp
+        /// </summary>
+        public IEnumerable<KeyValuePair<string, OcelEvent>> OrderedEvents => Events.ToList().OrderBy(e => e.Value.Timestamp);
+
+        /// <summary>
+        /// Indicates whether the log is valid according to the OCEL specification
+        /// </summary>
+        public bool IsValid => Events.All(e => e.Value.OMap.All(o => Objects.ContainsKey(o)));
     }
 
     public class OcelEvent
@@ -56,6 +67,14 @@ namespace OCEL.CSharp
             VMap = vMap;
         }
 
+        internal OcelEvent(OCEL.Types.OcelEvent ocelEvent)
+        {
+            Activity = ocelEvent.Activity;
+            Timestamp = ocelEvent.Timestamp;
+            OMap = ocelEvent.OMap;
+            VMap = ocelEvent.VMap.ToExplicitDictionary();
+        }
+
         public string Activity { get; set; }
 
         public DateTimeOffset Timestamp { get; set; }
@@ -67,6 +86,18 @@ namespace OCEL.CSharp
 
     public class OcelObject
     {
+        public OcelObject(string type, IDictionary<string, OcelValue> ovMap)
+        {
+            Type = type;
+            OvMap = ovMap;
+        }
+
+        internal OcelObject(OCEL.Types.OcelObject ocelObject)
+        {
+            Type = ocelObject.Type;
+            OvMap = ocelObject.OvMap.ToExplicitDictionary();
+        }
+
         public string Type { get; set; }
 
         public IDictionary<string, OcelValue> OvMap { get; set; }
