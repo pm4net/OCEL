@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace OCEL.CSharp
 {
@@ -35,9 +36,9 @@ namespace OCEL.CSharp
         /// <summary>
         /// Serialize an OCEL log into a JSON string.
         /// </summary>
-        public static string Serialize(OcelLog log)
+        public static string Serialize(OcelLog log, Formatting formatting)
         {
-            return OCEL.Json.Serialize(log.ToFSharpOcelLog());
+            return OCEL.Json.Serialize(formatting, log.ToFSharpOcelLog());
         }
     }
 }

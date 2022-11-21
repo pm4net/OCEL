@@ -1,6 +1,8 @@
+using Newtonsoft.Json;
+
 namespace OCEL.CSharp.Tests
 {
-    public class JsonTests
+    public static class JsonTests
     {
         public class SchemaValidation
         {
@@ -50,7 +52,20 @@ namespace OCEL.CSharp.Tests
             [Fact]
             public void CanSerializeSampleLog()
             {
-                Assert.True(true);
+                var json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel");
+                var parsed = Json.Deserialize(json);
+                var serialized = Json.Serialize(parsed, Formatting.Indented);
+                Assert.False(string.IsNullOrWhiteSpace(serialized));
+            }
+
+            [Fact]
+            public void CanSerializeSampleLogAndDeserializeItAgain()
+            {
+                var json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel");
+                var parsed = Json.Deserialize(json);
+                var serialized = Json.Serialize(parsed, Formatting.Indented);
+                var reSerialized = Json.Deserialize(serialized);
+                Assert.True(reSerialized.IsValid);
             }
         }
     }

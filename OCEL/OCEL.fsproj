@@ -9,8 +9,8 @@
 
   <ItemGroup>
     <Compile Include="Types.fs" />
-    <Compile Include="Xml.fs" />
     <Compile Include="Json.fs" />
+    <Compile Include="Xml.fs" />
   </ItemGroup>
 	
   <ItemGroup>

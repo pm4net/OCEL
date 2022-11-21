@@ -7,6 +7,7 @@ open System.IO
 open Newtonsoft.Json
 open Newtonsoft.Json.Schema
 open Newtonsoft.Json.Linq
+open Microsoft.FSharp.Reflection
 
 module Json =
 
@@ -139,5 +140,79 @@ module Json =
             }
     
     /// Serialize an OCEL log into a JSON string.
-    let Serialize (log: OcelLog) : string =
-        ""
+    let Serialize formatting (log: OcelLog) : string =
+        /// Get the value from the DU and put it into a JToken. Using reflection as FromObject handles the correct typing
+        let createTokenFromOcelValue value =
+            match value with
+            | OcelString s -> JToken.FromObject s
+            | OcelTimestamp t -> JToken.FromObject t
+            | OcelInteger i -> JToken.FromObject i
+            | OcelFloat f -> JToken.FromObject f
+            | OcelBoolean b -> JToken.FromObject b
+
+        /// Construct the global log object
+        let createGlobalLog log =
+            let jGlob = JObject()
+            log.GlobalAttributes |> Map.iter (fun k v -> jGlob[k] <- createTokenFromOcelValue v)
+            jGlob["ocel:attribute-names"] <- JArray(log.AttributeNames)
+            jGlob["ocel:object-types"] <- JArray(log.ObjectTypes)
+            jGlob
+
+        /// Construct an object with tokens mapping an ID to a value
+        let createIdValueMap map =
+            let jV = JObject()
+            map |> Map.iter (fun k v -> jV[k] <- createTokenFromOcelValue v)
+            jV
+
+        /// Create a single event from an OCEL event
+        let createEvent event =
+            let jEv = JObject()
+            jEv["ocel:activity"] <- event.Activity
+            jEv["ocel:timestamp"] <- event.Timestamp
+            jEv["ocel:omap"] <- JArray(event.OMap)
+            jEv["ocel:vmap"] <- JObject(createIdValueMap event.VMap)
+            jEv
+
+        /// Create the list of events
+        let createEvents log =
+            let jEv = JObject()
+            log.Events |> Seq.iter (fun e -> jEv[e.Key] <- createEvent e.Value)
+            jEv
+
+        /// Create a single object from an OCEL object
+        let createObject obj =
+            let jObj = JObject()
+            jObj["ocel:type"] <- obj.Type
+            jObj["ocel:ovmap"] <- createIdValueMap obj.OvMap
+            jObj
+
+        /// Create the list of objects
+        let createObjects log =
+            let jObj = JObject()
+            log.Objects |> Seq.iter (fun e -> jObj[e.Key] <- createObject e.Value)
+            jObj
+
+        if not log.IsValid then
+            failwith "Log is invalid."
+
+        let jObj = new JObject()
+        jObj["ocel:global-log"] <- createGlobalLog log
+        jObj["ocel:global-event"] <- JObject([
+            JProperty("ocel:id", "__INVALID__")
+            JProperty("ocel:activity", "__INVALID__")
+            JProperty("ocel:timestamp", "__INVALID__")
+            JProperty("ocel:omap", JArray())
+            JProperty("ocel:vmap", JObject())
+        ])
+        jObj["ocel:global-object"] <- JObject([
+            JProperty("ocel:id", "__INVALID__")
+            JProperty("ocel:type", "__INVALID__")
+            JProperty("ocel:ovmap", JObject())
+        ])
+        jObj["ocel:events"] <- createEvents log
+        jObj["ocel:objects"] <- createObjects log
+        
+        let json = jObj.ToString formatting
+        match json |> ValidateWithErrorMessages with
+        | true, _ -> json
+        | false, errors -> failwith $"""Serialized JSON could not be validated by the OCEL schema. Errors: {Environment.NewLine}{errors |> String.concat ", "}"""

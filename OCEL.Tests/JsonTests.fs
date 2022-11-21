@@ -43,4 +43,14 @@ module Json =
 
         [<Fact>]
         let ``Can serialize sample log`` () =
-            true
+            let json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel")
+            Json.Deserialize json |> Json.Serialize Newtonsoft.Json.Formatting.Indented |> Assert.NotNull
+
+        [<Fact>]
+        let ``Can serialize sample log and deserialize it again`` () =
+            let json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel")
+            let log = 
+                Json.Deserialize json 
+                |> Json.Serialize Newtonsoft.Json.Formatting.Indented
+                |> Json.Deserialize
+            log.IsValid |> Assert.True
