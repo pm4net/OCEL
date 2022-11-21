@@ -4,7 +4,7 @@ open System
 open System.Runtime.CompilerServices
 
 // Make internal properties available to the C# project
-[<assembly: InternalsVisibleTo("OCEL.Csharp")>]
+[<assembly: InternalsVisibleTo("OCEL.CSharp")>]
 do()
 
 type OcelValue =
@@ -79,7 +79,7 @@ type OcelLog with
         doAllObjectsReferencedInEventsExist
 
 /// Contains helper functions to convert to standard C# types
-module Converters =
+module internal Converters =
     let internal ToStandardDictionary map =
         map
         :> System.Collections.Generic.IDictionary<_,_>
