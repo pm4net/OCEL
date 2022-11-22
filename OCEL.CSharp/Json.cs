@@ -14,7 +14,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static Tuple<bool, IEnumerable<string>> ValidateWithErrorMessages(string json)
         {
-            return OCEL.Json.ValidateWithErrorMessages(json);
+            return OCEL.Json.validateWithErrorMessages(json);
         }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static bool Validate(string json)
         {
-            return OCEL.Json.Validate(json);
+            return OCEL.Json.validate(json);
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static OcelLog Deserialize(string json)
         {
-            return OCEL.Json.Deserialize(json).FromFSharpOcelLog();
+            return OCEL.Json.deserialize(json).FromFSharpOcelLog();
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static string Serialize(OcelLog log, Formatting formatting)
         {
-            return OCEL.Json.Serialize(formatting, log.ToFSharpOcelLog());
+            return OCEL.Json.serialize(formatting, log.ToFSharpOcelLog());
         }
     }
 }

@@ -105,13 +105,13 @@ module Json =
         extractFromObject jObj "ocel:objects" extractor
 
     /// Parse an OCEL JSON string by handling dates as DateTimeOffset
-    let private ParseWithDateTimeOffsetHandling json =
+    let private parseWithDateTimeOffsetHandling json =
         let reader = new JsonTextReader(new StringReader(json))
         reader.DateParseHandling <- DateParseHandling.DateTimeOffset
         JObject.Load reader
 
     /// Validate a JSON string against the OCEL JSON schema, with error messages
-    let private ValidateJObjectWithErrorMessages (jObj: JObject) =
+    let private validateJObjectWithErrorMessages (jObj: JObject) =
         let mutable errors : System.Collections.Generic.IList<string> = Array.empty
         let valid = jObj.IsValid(Schema, &errors)
         (valid, errors :> seq<_>)
@@ -119,18 +119,18 @@ module Json =
     (* --- PUBLIC MEMBERS --- *)
 
     /// Validate a JSON string against the OCEL JSON schema, with error messages.
-    let ValidateWithErrorMessages json =
-        let jObj = ParseWithDateTimeOffsetHandling json
-        ValidateJObjectWithErrorMessages jObj
+    let validateWithErrorMessages json =
+        let jObj = parseWithDateTimeOffsetHandling json
+        validateJObjectWithErrorMessages jObj
 
     /// Validate a JSON string against the OCEL JSON schema.
-    let Validate json =
-        (ParseWithDateTimeOffsetHandling json).IsValid Schema
+    let validate json =
+        (parseWithDateTimeOffsetHandling json).IsValid Schema
 
     /// Deserialize a JSON string into an OCEL log, and validate it against the OCEL schema.
-    let Deserialize json =
-        let jObj = ParseWithDateTimeOffsetHandling json
-        match ValidateJObjectWithErrorMessages jObj with
+    let deserialize json =
+        let jObj = parseWithDateTimeOffsetHandling json
+        match validateJObjectWithErrorMessages jObj with
         | false, errors -> failwith $"""JSON not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat ", "}."""
         | true, _ ->
             {
@@ -140,7 +140,7 @@ module Json =
             }
     
     /// Serialize an OCEL log into a JSON string.
-    let Serialize formatting (log: OcelLog) : string =
+    let serialize formatting (log: OcelLog) : string =
         /// Get the value from the DU and put it into a JToken. Using reflection as FromObject handles the correct typing
         let createTokenFromOcelValue value =
             match value with
@@ -213,6 +213,6 @@ module Json =
         jObj["ocel:objects"] <- createObjects log
         
         let json = jObj.ToString formatting
-        match json |> ValidateWithErrorMessages with
+        match json |> validateWithErrorMessages with
         | true, _ -> json
         | false, errors -> failwith $"""Serialized JSON could not be validated by the OCEL schema. Errors: {Environment.NewLine}{errors |> String.concat ", "}"""
