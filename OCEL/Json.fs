@@ -7,7 +7,6 @@ open System.IO
 open Newtonsoft.Json
 open Newtonsoft.Json.Schema
 open Newtonsoft.Json.Linq
-open Microsoft.FSharp.Reflection
 
 module Json =
 

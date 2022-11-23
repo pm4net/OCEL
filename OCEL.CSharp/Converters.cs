@@ -1,15 +1,17 @@
-﻿namespace OCEL.CSharp
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace OCEL.CSharp
 {
     internal static class FSharpConverters
     {
-        internal static IDictionary<TKey, TValue> ToExplicitDictionary<TKey, TValue>(
-            this IDictionary<TKey, TValue> map) where TKey : notnull
+        internal static IDictionary<TKey, TValue> ToExplicitDictionary<TKey, TValue>(this IDictionary<TKey, TValue> map)
         {
             return new Dictionary<TKey, TValue>(map);
         }
 
-        internal static Microsoft.FSharp.Collections.FSharpMap<TKey, TValue> ToFSharpMap<TKey, TValue>(
-            this IDictionary<TKey, TValue> dict) where TKey : notnull
+        internal static Microsoft.FSharp.Collections.FSharpMap<TKey, TValue> ToFSharpMap<TKey, TValue>(this IDictionary<TKey, TValue> dict)
         {
             return new Microsoft.FSharp.Collections.FSharpMap<TKey, TValue>(
                 dict.Select(x => new Tuple<TKey, TValue>(x.Key, x.Value)));
