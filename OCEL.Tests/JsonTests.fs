@@ -6,6 +6,8 @@ open System
 open System.IO
 open Xunit
 
+#if !NETSTANDARD // Can not execute tests with .NET Standard
+
 module Json =
 
     module ``Schema Validation`` =
@@ -54,3 +56,5 @@ module Json =
                 |> Json.serialize Newtonsoft.Json.Formatting.Indented
                 |> Json.deserialize
             log.IsValid |> Assert.True
+
+#endif

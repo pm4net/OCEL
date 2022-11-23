@@ -4,6 +4,8 @@ using Xunit;
 
 namespace OCEL.CSharp.Tests
 {
+#if !NETSTANDARD // Can not execute tests with .NET Standard
+
     public static class JsonTests
     {
         public class SchemaValidation
@@ -71,4 +73,6 @@ namespace OCEL.CSharp.Tests
             }
         }
     }
+
+#endif
 }
