@@ -1,7 +1,6 @@
 ﻿namespace OCEL.Types
 
 open System
-open System.Runtime.CompilerServices
 
 type OcelValue =
     | OcelString of string

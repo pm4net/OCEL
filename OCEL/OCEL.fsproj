@@ -9,7 +9,9 @@
 
   <ItemGroup>
     <Compile Include="Types.fs" />
+    <Compile Include="Json.fsi" />
     <Compile Include="Json.fs" />
+    <Compile Include="Xml.fsi" />
     <Compile Include="Xml.fs" />
   </ItemGroup>
 	

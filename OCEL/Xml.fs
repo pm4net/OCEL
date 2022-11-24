@@ -6,14 +6,18 @@ module Xml =
     [<Literal>]
     let private SchemaXml = ""
 
-    let Validate xml =
+    let validateWithErrorMessages (xml: string) =
+        true, ([]: seq<string>)
+
+    let validate (xml: string) =
         true
 
-    let ValidateWithErrorMessages xml =
-        true, []
+    let deserialize (xml: string) =
+        {
+            GlobalAttributes = Map.empty
+            Events = Map.empty
+            Objects = Map.empty
+        }
 
-    let Deserialize xml =
-        []
-
-    let Serialize log =
+    let serialize (log: OcelLog) =
         ""
