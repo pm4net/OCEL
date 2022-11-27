@@ -117,16 +117,16 @@ module Json =
 
     (* --- PUBLIC MEMBERS --- *)
 
-    /// Validate a JSON string against the OCEL JSON schema, with error messages.
+    /// <inheritdoc />
     let validateWithErrorMessages json =
         let jObj = parseWithDateTimeOffsetHandling json
         validateJObjectWithErrorMessages jObj
 
-    /// Validate a JSON string against the OCEL JSON schema.
+    /// <inheritdoc />
     let validate json =
         (parseWithDateTimeOffsetHandling json).IsValid Schema
 
-    /// Deserialize a JSON string into an OCEL log, and validate it against the OCEL schema.
+    /// <inheritdoc />
     let deserialize json =
         let jObj = parseWithDateTimeOffsetHandling json
         match validateJObjectWithErrorMessages jObj with
@@ -138,7 +138,7 @@ module Json =
                 Objects = extractObjects jObj
             }
     
-    /// Serialize an OCEL log into a JSON string.
+    /// <inheritdoc />
     let serialize (formatting: OCEL.Types.Formatting) (log: OcelLog) : string =
         /// Get the value from the DU and put it into a JToken. Using reflection as FromObject handles the correct typing
         let createTokenFromOcelValue value =
