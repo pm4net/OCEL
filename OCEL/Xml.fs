@@ -20,6 +20,20 @@ module Xml =
         log.Elements("global")
         |> Seq.tryFind (fun e -> e.Attribute("scope").Value = scope)
 
+    /// Try to find the element where the key has a given value
+    let private getElementWithKey keyValue (log: XElement) =
+        log.Elements()
+        |> Seq.tryFind (fun e -> e.Attribute("key").Value = keyValue)
+
+    /// Get the value of an element that has a given key
+    let private getValueOfElementWithKey keyValue (log: XElement) =
+        match getElementWithKey keyValue log with
+        | None -> failwith $"No element with key \"{keyValue}\" defined for element: {log}"
+        | Some e ->
+            match e.Attribute "value" |> Option.ofObj with
+            | None -> failwith $"No attribute \"value\" defined for element: {e}"
+            | Some v -> v.Value
+
     /// Extract the OCEL value from an attribute and try to find the correct type for it
     let private extractValueFromAttribute (xAttr: XAttribute) =
         match System.Int32.TryParse xAttr.Value with
@@ -66,9 +80,26 @@ module Xml =
                     | Some value -> key.Value, extractValueFromAttribute value)
             |> Map.ofSeq
 
+    /// Extract information from an object, given some extractor function
+    let private extractFromObject (log: XElement) (name: string) extractor =
+        match log.Element name |> Option.ofObj with
+        | None -> failwith $"No <{name}> element defined"
+        | Some root ->
+            root.Elements()
+            |> Seq.map(fun e -> getValueOfElementWithKey "id" e, extractor e)
+            |> Map.ofSeq
+
     /// Extract all events from an OCEL log
     let private extractEvents (log: XElement) =
-        Map.empty
+        let extractor (event: XElement) = {
+            Activity = getValueOfElementWithKey "activity" event
+            Timestamp = match getValueOfElementWithKey "timestamp" event |> System.DateTimeOffset.TryParse with
+                        | true, dto -> dto
+                        | _ -> failwith $"\"timestamp\" element cannot be parsed as DateTimeOffset on event: {event}"
+            OMap = []
+            VMap = Map.empty
+        }
+        extractFromObject log "events" extractor
 
     /// Extract all objects from an OCEL log
     let private extractObjects (log: XElement) =
