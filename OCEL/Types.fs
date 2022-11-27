@@ -2,6 +2,14 @@
 
 open System
 
+// Auxilliary types
+
+type Formatting =
+    | None = 0
+    | Indented = 1
+
+// OCEL types
+
 type OcelValue =
     | OcelString of string
     | OcelTimestamp of DateTimeOffset

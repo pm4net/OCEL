@@ -139,7 +139,7 @@ module Json =
             }
     
     /// Serialize an OCEL log into a JSON string.
-    let serialize formatting (log: OcelLog) : string =
+    let serialize (formatting: OCEL.Types.Formatting) (log: OcelLog) : string =
         /// Get the value from the DU and put it into a JToken. Using reflection as FromObject handles the correct typing
         let createTokenFromOcelValue value =
             match value with
@@ -211,7 +211,7 @@ module Json =
         jObj["ocel:events"] <- createEvents log
         jObj["ocel:objects"] <- createObjects log
         
-        let json = jObj.ToString formatting
+        let json = jObj.ToString (formatting |> LanguagePrimitives.EnumToValue |> enum<Newtonsoft.Json.Formatting>)
         match json |> validateWithErrorMessages with
         | true, _ -> json
         | false, errors -> failwith $"""Serialized JSON could not be validated by the OCEL schema. Errors: {Environment.NewLine}{errors |> String.concat ", "}"""
