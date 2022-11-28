@@ -17,7 +17,8 @@ module Xml =
 
     /// Try to find the global element with a given scope
     let private globalWithScope scope (log: XElement) =
-        log.Elements("global")
+        log.Elements()
+        |> Seq.filter (fun e -> e.Name.LocalName = "global")
         |> Seq.tryFind (fun e -> e.Attribute("scope").Value = scope)
 
     /// Try to find the element where the key has a given value
@@ -82,7 +83,7 @@ module Xml =
 
     /// Extract information from an object, given some extractor function
     let private extractFromObject (log: XElement) (name: string) extractor =
-        match log.Element name |> Option.ofObj with
+        match log.Elements() |> Seq.tryFind (fun e -> e.Name.LocalName = name) with
         | None -> failwith $"No <{name}> element defined"
         | Some root ->
             root.Elements()
@@ -129,16 +130,18 @@ module Xml =
     /// <inheritdoc />
     let deserialize (xml: string) =
         let xDoc = XDocument.Parse xml
-        let xElm = xDoc.Element "log"
-        match xDoc |> validateXDocumentWithErrorMessages with
-        | false, errors -> failwith $"""XML not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat ", "}."""
-        | true, _ ->
-            {
-                GlobalAttributes = extractAttributesFromGlobalLog xElm
-                Events = extractEvents xElm
-                Objects = extractObjects xElm
-            }
-
+        match xDoc.Elements() |> Seq.tryFind (fun e -> e.Name.LocalName = "log") with
+        | None -> failwith ""
+        | Some xElm ->
+            match xDoc |> validateXDocumentWithErrorMessages with
+            | false, errors -> failwith $"""XML not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat ", "}."""
+            | true, _ ->
+                {
+                    GlobalAttributes = extractAttributesFromGlobalLog xElm
+                    Events = extractEvents xElm
+                    Objects = extractObjects xElm
+                }
+        
     /// <inheritdoc />
     let serialize (formatting: Formatting) (log: OcelLog) =
         ""
