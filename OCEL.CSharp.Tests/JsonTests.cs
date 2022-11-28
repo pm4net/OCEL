@@ -67,7 +67,7 @@ namespace OCEL.CSharp.Tests
         [Fact]
         public void CanSerializeGitHubPm4PyLog()
         {
-            var json = File.ReadAllText("minimal.jsonocel");
+            var json = File.ReadAllText("github_pm4py.jsonocel");
             var parsed = Json.Deserialize(json);
             var serialized = Json.Serialize(parsed, Types.Formatting.Indented);
             var valid = Json.Validate(serialized);
