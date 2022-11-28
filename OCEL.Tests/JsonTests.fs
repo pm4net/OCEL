@@ -6,57 +6,59 @@ open OCEL.Types
 open System
 open System.IO
 open Xunit
+open Xunit.Abstractions
 
-module Json =
+type JsonTests(output: ITestOutputHelper) =
 
-    module ``Schema Validation`` =
+    [<Fact>]
+    member __.``Sample JSON is valid according to schema`` () =
+        let json = File.ReadAllText("minimal.jsonocel")
+        json |> Json.validate |> Assert.True
 
-        [<Fact>]
-        let ``Sample JSON is valid according to schema`` () =
-            let json = File.ReadAllText("minimal.jsonocel")
-            json |> Json.validate |> Assert.True
+    [<Fact>]
+    member __.``Can parse sample JSON`` () =
+        let json = File.ReadAllText("minimal.jsonocel")
+        json |> Json.deserialize |> Assert.NotNull
 
-    module Deserialization =
+    [<Fact>]
+    member __.``Parsed sample JSON satisfies well-formedness property`` () =
+        let json = File.ReadAllText("minimal.jsonocel")
+        let parsed = Json.deserialize json
+        parsed.IsValid |> Assert.True
 
-        [<Fact>]
-        let ``Can parse sample JSON`` () =
-            let json = File.ReadAllText("minimal.jsonocel")
-            json |> Json.deserialize |> Assert.NotNull
+    [<Fact>]
+    member __.``Can parse "GitHub pm4py" log`` () =
+        let json = File.ReadAllText("github_pm4py.jsonocel")
+        json |> Json.deserialize |> Assert.NotNull
 
-        [<Fact>]
-        let ``Parsed sample JSON satisfies well-formedness property`` () =
-            let json = File.ReadAllText("minimal.jsonocel")
-            let parsed = Json.deserialize json
-            parsed.IsValid |> Assert.True
+    [<Fact>]
+    member __.``Parsed "GitHub pm4py" JSON satisfies well-formedness property`` () =
+        let json = File.ReadAllText("github_pm4py.jsonocel")
+        let parsed = Json.deserialize json
+        parsed.IsValid |> Assert.True
 
-        [<Fact>]
-        let ``Can parse "GitHub pm4py" log`` () =
-            let json = File.ReadAllText("github_pm4py.jsonocel")
-            json |> Json.deserialize |> Assert.NotNull
+    [<Fact>]
+    member __.``Can serialize sample log`` () =
+        let json = File.ReadAllText("minimal.jsonocel")
+        let parsed = json |> Json.deserialize
+        let serialized = parsed |> Json.serialize Formatting.Indented
+        output.WriteLine $"Serialized JSON:{Environment.NewLine}{json}"
+        serialized |> Json.validate |> Assert.True
 
-        [<Fact>]
-        let ``Parsed "GitHub pm4py" JSON satisfies well-formedness property`` () =
-            let json = File.ReadAllText("github_pm4py.jsonocel")
-            let parsed = Json.deserialize json
-            parsed.IsValid |> Assert.True
+    [<Fact>]
+    member __.``Can serialize "GitHub pm4pmy" log`` () =
+        let json = File.ReadAllText("github_pm4py.jsonocel")
+        let parsed = json |> Json.deserialize
+        let serialized = parsed |> Json.serialize Formatting.Indented
+        output.WriteLine $"Serialized JSON:{Environment.NewLine}{json}"
+        serialized |> Json.validate |> Assert.True
 
-    module Serialization =
-
-        [<Fact>]
-        let ``Can serialize sample log`` () =
-            let json = File.ReadAllText("minimal.jsonocel")
-            json 
+    [<Fact>]
+    member __.``Can serialize sample log and deserialize it again`` () =
+        let json = File.ReadAllText("minimal.jsonocel")
+        let log = 
+            json
             |> Json.deserialize 
-            |> Json.serialize Formatting.Indented 
-            |> String.IsNullOrWhiteSpace 
-            |> Assert.NotNull
-
-        [<Fact>]
-        let ``Can serialize sample log and deserialize it again`` () =
-            let json = File.ReadAllText("minimal.jsonocel")
-            let log = 
-                json
-                |> Json.deserialize 
-                |> Json.serialize Formatting.Indented
-                |> Json.deserialize
-            log.IsValid |> Assert.True
+            |> Json.serialize Formatting.Indented
+            |> Json.deserialize
+        log.IsValid |> Assert.True
