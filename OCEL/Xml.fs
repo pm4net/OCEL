@@ -5,7 +5,6 @@ open System.Globalization
 open System.IO
 open System.Xml.Schema
 open System.Xml.Linq
-open FSharp.Data
 open OCEL.Types
 
 module Xml =
@@ -154,14 +153,99 @@ module Xml =
         | None -> failwith ""
         | Some xElm ->
             match xDoc |> validateXDocumentWithErrorMessages with
-            | false, errors -> failwith $"""XML not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat ", "}."""
+            | false, errors -> failwith $"""XML not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat Environment.NewLine}."""
             | true, _ ->
                 {
                     GlobalAttributes = extractAttributesFromGlobalLog xElm
                     Events = extractEvents xElm
                     Objects = extractObjects xElm
                 }
+
+    /// StringWriter uses UTF-16 by default with no way of changing it. This class inherits and overrides the Encoding of the default StringWriter.
+    type private Utf8StringWriter() =
+        inherit StringWriter()
+        override _.Encoding = System.Text.Encoding.UTF8
         
     /// <inheritdoc />
-    let serialize (formatting: Formatting) (log: OcelLog) =
-        ""
+    let serialize formatting (log: OcelLog) =
+        /// Convert custom formatting enum to XML save options
+        let toXmlSaveOptions formatting =
+            match formatting with
+            | Formatting.None -> SaveOptions.DisableFormatting
+            | Formatting.Indented -> SaveOptions.None
+            | _ -> raise (ArgumentOutOfRangeException(nameof(formatting)))
+
+        /// Create an XELement from a name, key, and value
+        let createXElementFromKeyValue (elementName: string) key value =
+            let xElem = XElement(elementName)
+            xElem.SetAttributeValue("key", key)
+            xElem.SetAttributeValue("value", value)
+            xElem
+
+        /// Create an XElement from an OCEL value and a key
+        let createXElementFromKeyOcelValue key (value: OcelValue) =
+            let xElem, strVal =
+                match value with
+                | OcelString s -> XElement "string", s
+                | OcelTimestamp t -> XElement "date", t.ToString("O", CultureInfo.InvariantCulture) // ISO-8601 format identifier
+                | OcelInteger i -> XElement "int", i.ToString(CultureInfo.InvariantCulture) // TODO
+                | OcelFloat f -> XElement "float", f.ToString(CultureInfo.InvariantCulture)
+                | OcelBoolean b -> XElement "bool", b.ToString(CultureInfo.InvariantCulture) // TODO
+            xElem.SetAttributeValue("key", key)
+            xElem.SetAttributeValue("value", strVal)
+            xElem
+
+        /// Create a list of string of elements, given the key for the list and the key for each list item
+        let createXElementList listKey itemKey items =
+            let xElem = XElement "list"
+            xElem.SetAttributeValue("key", listKey)
+            items |> Seq.iter (fun i -> createXElementFromKeyOcelValue itemKey (OcelString i) |> xElem.Add)
+            xElem
+
+        /// Create the global log from the OCEL log
+        let createGlobalLog (log: OcelLog) =
+            let xGlob = XElement "global"
+            xGlob.SetAttributeValue("scope", "log")
+            log.GlobalAttributes |> Map.iter (fun k v -> createXElementFromKeyOcelValue k v |> xGlob.Add)
+            createXElementList "attribute-names" "name" log.AttributeNames |> xGlob.Add
+            createXElementList "object-types" "type" log.ObjectTypes |> xGlob.Add
+            xGlob
+
+        /// A default global event
+        let globalEvent =
+            let xElem = XElement "global"
+            xElem.SetAttributeValue("scope", "event")
+            xElem.Add(createXElementFromKeyValue "string" "id" "__INVALID__")
+            xElem.Add(createXElementFromKeyValue "string" "activity" "__INVALID__")
+            xElem.Add(createXElementFromKeyValue "string" "timestamp" "__INVALID__")
+            xElem.Add(createXElementFromKeyValue "string" "omap" "__INVALID__")
+            xElem.Add(createXElementFromKeyValue "string" "vmap" "__INVALID__")
+            xElem
+
+        let globalObject =
+            let xElem = XElement "global"
+            xElem.SetAttributeValue("scope", "object")
+            xElem.Add(createXElementFromKeyValue "string" "id" "__INVALID__")
+            xElem.Add(createXElementFromKeyValue "string" "type" "__INVALID__")
+            xElem.Add(createXElementFromKeyValue "string" "ovmap" "__INVALID__")
+            xElem
+
+        if not log.IsValid then
+            failwith "Log is invalid."
+
+        let xDoc = XDocument()
+        xDoc.Declaration <- XDeclaration("1.0", "UTF-8", null)
+        let xRoot = XElement("log")
+        xDoc.Add xRoot
+
+        // Add actual values to the document by using helper functions
+        log |> createGlobalLog |> xRoot.Add
+        globalEvent |> xRoot.Add
+        globalObject |> xRoot.Add
+
+        let strWriter = new Utf8StringWriter()
+        xDoc.Save(strWriter, formatting |> toXmlSaveOptions)
+        let xml = strWriter.ToString()
+        match xml |> validateWithErrorMessages with
+        | true, _ -> xml
+        | false, errors -> failwith $"""Serialized XML could not be validated by the OCEL schema. Errors: {Environment.NewLine}{errors |> String.concat Environment.NewLine}"""

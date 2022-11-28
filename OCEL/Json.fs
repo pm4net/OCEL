@@ -130,7 +130,7 @@ module Json =
     let deserialize json =
         let jObj = parseWithDateTimeOffsetHandling json
         match validateJObjectWithErrorMessages jObj with
-        | false, errors -> failwith $"""JSON not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat ", "}."""
+        | false, errors -> failwith $"""JSON not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat Environment.NewLine}."""
         | true, _ ->
             {
                 GlobalAttributes = extractAttributesFromGlobalLog jObj
@@ -191,6 +191,13 @@ module Json =
             log.Objects |> Seq.iter (fun e -> jObj[e.Key] <- createObject e.Value)
             jObj
 
+        /// Convert custom formatting enum to Newtonsoft formatting enum
+        let toNewtonSoftFormatting formatting =
+            match formatting with
+            | Types.Formatting.None -> Newtonsoft.Json.Formatting.None
+            | Types.Formatting.Indented -> Newtonsoft.Json.Formatting.Indented
+            | _ -> raise (ArgumentOutOfRangeException(nameof(formatting)))
+
         if not log.IsValid then
             failwith "Log is invalid."
 
@@ -211,7 +218,7 @@ module Json =
         jObj["ocel:events"] <- createEvents log
         jObj["ocel:objects"] <- createObjects log
         
-        let json = jObj.ToString (formatting |> LanguagePrimitives.EnumToValue |> enum<Newtonsoft.Json.Formatting>)
+        let json = jObj.ToString (formatting |> toNewtonSoftFormatting)
         match json |> validateWithErrorMessages with
         | true, _ -> json
-        | false, errors -> failwith $"""Serialized JSON could not be validated by the OCEL schema. Errors: {Environment.NewLine}{errors |> String.concat ", "}"""
+        | false, errors -> failwith $"""Serialized JSON could not be validated by the OCEL schema. Errors: {Environment.NewLine}{errors |> String.concat Environment.NewLine}"""
