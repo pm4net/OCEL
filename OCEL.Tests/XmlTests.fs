@@ -48,8 +48,17 @@ module Xml =
             xml 
             |> Xml.deserialize 
             |> Xml.serialize Formatting.Indented 
-            |> String.IsNullOrWhiteSpace 
-            |> Assert.False
+            |> Xml.validate
+            |> Assert.True
+
+        [<Fact>]
+        let ``Can serialize "GitHub pm4pmy" log`` () =
+            let xml = File.ReadAllText(@"..\..\..\..\Samples\github_pm4py.xmlocel")
+            xml 
+            |> Xml.deserialize 
+            |> Xml.serialize Formatting.Indented 
+            |> Xml.validate
+            |> Assert.True
 
         [<Fact>]
         let ``Can serialize sample log and deserialize it again`` () =

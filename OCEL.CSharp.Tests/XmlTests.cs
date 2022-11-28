@@ -61,7 +61,18 @@ namespace OCEL.CSharp.Tests
                 var xml = File.ReadAllText(@"..\..\..\..\Samples\minimal.xmlocel");
                 var parsed = Xml.Deserialize(xml);
                 var serialized = Xml.Serialize(parsed, Types.Formatting.Indented);
-                Assert.False(string.IsNullOrWhiteSpace(serialized));
+                var valid = Xml.Validate(serialized);
+                Assert.True(valid);
+            }
+
+            [Fact]
+            public void CanSerializeGitHubPm4PyLog()
+            {
+                var xml = File.ReadAllText(@"..\..\..\..\Samples\github_pm4py.xmlocel");
+                var parsed = Xml.Deserialize(xml);
+                var serialized = Xml.Serialize(parsed, Types.Formatting.Indented);
+                var valid = Xml.Validate(serialized);
+                Assert.True(valid);
             }
 
             [Fact]

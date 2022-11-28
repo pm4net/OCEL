@@ -29,20 +29,59 @@ module Xml =
             | None -> failwith $"No attribute \"value\" defined for element: {e}"
             | Some v -> v.Value
 
+    /// Try to parse a string to a DateTimeOffset
+    let private tryParseDateTimeOffset (str: string) =
+        match System.DateTimeOffset.TryParse(str, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal) with
+        | true, dto -> OcelTimestamp dto |> Some
+        | _ -> None
+
+    /// Try to parse a string to a Double
+    let private tryParseDouble (str: string) =
+        match System.Double.TryParse(str, NumberStyles.Float, CultureInfo.InvariantCulture) with
+        | true, double -> OcelFloat double |> Some
+        | _ -> None
+
+    /// Try to parse a string to an Integer
+    let private tryParseInt (str: string) =
+        match System.Int32.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture) with
+        | true, int -> OcelInteger int |> Some
+        | _ -> None
+
+    /// Try to parse a string to a Boolean
+    let private tryParseBool (str: string) =
+        match System.Boolean.TryParse str with
+        | true, bool -> OcelBoolean bool |> Some
+        | _ -> None
+
     /// Extract the OCEL value from an attribute and try to find the correct type for it
-    let private extractValueFromAttribute (xAttr: XAttribute) =
-        match System.Int32.TryParse(xAttr.Value, NumberStyles.Integer, CultureInfo.InvariantCulture) with
-        | true, int -> OcelInteger int
-        | _ ->
-            match System.Double.TryParse(xAttr.Value, NumberStyles.Float, CultureInfo.InvariantCulture) with
-            | true, double -> OcelFloat double
-            | _ ->
-                match System.Boolean.TryParse xAttr.Value with
-                | true, bool -> OcelBoolean bool
-                | _ ->
-                    match System.DateTimeOffset.TryParse(xAttr.Value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal) with
-                    | true, dto -> OcelTimestamp dto
-                    | _ -> OcelString xAttr.Value
+    let private guessValueFromAttribute (xAttr: XAttribute) =
+        match tryParseInt xAttr.Value with
+        | Some i -> i
+        | None ->
+            match tryParseDouble xAttr.Value with
+            | Some d -> d
+            | None ->
+                match tryParseBool xAttr.Value with
+                | Some b -> b
+                | None ->
+                    match tryParseDateTimeOffset xAttr.Value with
+                    | Some dto -> dto
+                    | None -> OcelString xAttr.Value
+
+    /// Extract the OCEl value from an attribute by looking at the XML name first, and using a fallback function if it cannot parse the suggested type
+    let private extractValueFromAttribute (xElem: XElement) (xAttr: XAttribute) =
+        let tryParseOrFallback parser (xAttr: XAttribute) =
+            match parser xAttr.Value with
+            | Some result -> result
+            | None -> guessValueFromAttribute xAttr
+
+        match xElem.Name.LocalName with
+        | "String" | "string" -> OcelString xAttr.Value
+        | "Date" | "date" -> tryParseOrFallback tryParseDateTimeOffset xAttr
+        | "Float" | "float" -> tryParseOrFallback tryParseDouble xAttr
+        | "Int" | "int" -> tryParseOrFallback tryParseInt xAttr
+        | "Bool" | "bool" -> tryParseOrFallback tryParseBool xAttr
+        | _ -> guessValueFromAttribute xAttr
 
     /// Extract a sequence of value from a list with a given name inside the given element, using some extractor function on 
     let extractArray (xElem: XElement) name extractor =
@@ -55,7 +94,7 @@ module Xml =
     /// Extractor function that extracts the ID from the key attribute and the value from the Value attribute
     let tupleExtractor (xElem: XElement) = 
         match (xElem.Attribute "key" |> Option.ofObj, xElem.Attribute "value" |> Option.ofObj) with
-        | Some k, Some v -> k.Value, extractValueFromAttribute v
+        | Some k, Some v -> k.Value, extractValueFromAttribute xElem v
         | None, Some _ -> failwith $"No \"key\" attribute defined for element: {xElem}"
         | Some _, None -> failwith $"No \"value\" attribute defined for element: {xElem}"
         | _ -> failwith $"No \"key\" and \"value\" attribute defined for element: {xElem}"
@@ -90,7 +129,7 @@ module Xml =
                 | Some key ->
                     match e.Attribute "value" |> Option.ofObj with
                     | None -> failwith $"Property {e} has no value attribute."
-                    | Some value -> key.Value, extractValueFromAttribute value)
+                    | Some value -> key.Value, extractValueFromAttribute e value)
             |> Map.ofSeq
 
     /// Extract information from an object, given some extractor function
@@ -188,9 +227,9 @@ module Xml =
                 match value with
                 | OcelString s -> XElement "string", s
                 | OcelTimestamp t -> XElement "date", t.ToString("O", CultureInfo.InvariantCulture) // ISO-8601 format identifier
-                | OcelInteger i -> XElement "int", i.ToString(CultureInfo.InvariantCulture) // TODO: What identifier?
+                | OcelInteger i -> XElement "int", i.ToString(CultureInfo.InvariantCulture)
                 | OcelFloat f -> XElement "float", f.ToString(".0###############", CultureInfo.InvariantCulture)
-                | OcelBoolean b -> XElement "bool", b.ToString(CultureInfo.InvariantCulture) // TODO: What identifier?
+                | OcelBoolean b -> XElement "bool", b.ToString(CultureInfo.InvariantCulture)
             xElem.SetAttributeValue("key", key)
             xElem.SetAttributeValue("value", strVal)
             xElem
