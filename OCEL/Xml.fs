@@ -17,13 +17,13 @@ module Xml =
     let private Schema = XmlSchema.Read(new StringReader(SchemaXml), null)
 
     /// Try to find the element where the key has a given value
-    let private getElementWithKey keyValue (element: XElement) =
+    let private extractElementWithKey keyValue (element: XElement) =
         element.Elements()
         |> Seq.tryFind (fun e -> e.Attribute("key").Value = keyValue)
 
     /// Get the value of an element that has a given key
-    let private getStringValueOfElementWithKey keyValue (xElem: XElement) =
-        match getElementWithKey keyValue xElem with
+    let private extractStringValueOfElementWithKey keyValue (xElem: XElement) =
+        match extractElementWithKey keyValue xElem with
         | None -> failwith $"No element with key \"{keyValue}\" defined for element: {xElem}"
         | Some e ->
             match e.Attribute "value" |> Option.ofObj with
@@ -47,14 +47,22 @@ module Xml =
 
     /// Extract a sequence of value from a list with a given name inside the given element, using some extractor function on 
     let extractArray (xElem: XElement) name extractor =
-        match getElementWithKey name xElem with
+        match extractElementWithKey name xElem with
         | None -> failwith $"No <{name}> defined for element: {xElem}"
         | Some l ->
             l.Elements()
             |> Seq.map extractor
 
+    /// Extractor function that extracts the ID from the key attribute and the value from the Value attribute
+    let tupleExtractor (xElem: XElement) = 
+        match (xElem.Attribute "key" |> Option.ofObj, xElem.Attribute "value" |> Option.ofObj) with
+        | Some k, Some v -> k.Value, extractValueFromAttribute v
+        | None, Some _ -> failwith $"No \"key\" attribute defined for element: {xElem}"
+        | Some _, None -> failwith $"No \"value\" attribute defined for element: {xElem}"
+        | _ -> failwith $"No \"key\" and \"value\" attribute defined for element: {xElem}"
+
     /// Get the key attribute of an element where the value of the key matches the input
-    let private getKeyAttributeWithKeyValue name (xEl: XElement) =
+    let private extractKeyAttributeWithKeyValue name (xEl: XElement) =
         match xEl.Attribute "key" |> Option.ofObj with
         | Some attr ->
             match attr.Value = name with
@@ -63,20 +71,20 @@ module Xml =
         | None -> None
 
     /// Try to find the global element with a given scope
-    let private globalWithScope scope (element: XElement) =
+    let private extractGlobalWithScope scope (element: XElement) =
         element.Elements()
         |> Seq.filter (fun e -> e.Name.LocalName = "global")
         |> Seq.tryFind (fun e -> e.Attribute("scope").Value = scope)
 
     /// Extract attributes that are not the attribute names and object types from the global log object
     let private extractAttributesFromGlobalLog (log: XElement) =
-        match log |> globalWithScope "log" with
+        match log |> extractGlobalWithScope "log" with
         | None -> Map.empty
         | Some g ->
             g.Elements()
             |> Seq.filter (fun e ->
-                getKeyAttributeWithKeyValue "attribute-names" e = None && 
-                getKeyAttributeWithKeyValue "object-types" e = None)
+                extractKeyAttributeWithKeyValue "attribute-names" e = None && 
+                extractKeyAttributeWithKeyValue "object-types" e = None)
             |> Seq.map (fun e ->
                 match e.Attribute "key" |> Option.ofObj with
                 | None -> failwith $"Property {e} has no key attribute."
@@ -92,33 +100,31 @@ module Xml =
         | None -> failwith $"No <{name}> element defined for element: {log}"
         | Some root ->
             root.Elements()
-            |> Seq.map(fun e -> getStringValueOfElementWithKey "id" e, extractor e)
+            |> Seq.map(fun e -> extractStringValueOfElementWithKey "id" e, extractor e)
             |> Map.ofSeq
 
     /// Extract all events from an OCEL log
     let private extractEvents (log: XElement) =
         let extractor (event: XElement) = {
-            Activity = getStringValueOfElementWithKey "activity" event
-            Timestamp = match getStringValueOfElementWithKey "timestamp" event |> System.DateTimeOffset.TryParse with
+            Activity = extractStringValueOfElementWithKey "activity" event
+            Timestamp = match extractStringValueOfElementWithKey "timestamp" event |> System.DateTimeOffset.TryParse with
                         | true, dto -> dto
                         | _ -> failwith $"\"timestamp\" element cannot be parsed as DateTimeOffset on event: {event}"
             OMap = extractArray event "omap" (fun elem -> 
                 match elem.Attribute "value" |> Option.ofObj with
                 | Some v -> v.Value
                 | None -> failwith $"No \"value\" attribute defined for element: {elem}")
-            VMap = extractArray event "vmap" (fun elem ->
-                match (elem.Attribute "key" |> Option.ofObj, elem.Attribute "value" |> Option.ofObj) with
-                | Some k, Some v -> k.Value, extractValueFromAttribute v
-                | None, Some _ -> failwith $"No \"key\" attribute defined for element: {elem}"
-                | Some _, None -> failwith $"No \"value\" attribute defined for element: {elem}"
-                | _ -> failwith $"No \"key\" and \"value\" attribute defined for element: {elem}")
-                |> Map.ofSeq
+            VMap = extractArray event "vmap" tupleExtractor |> Map.ofSeq
         }
         extractFromObject log "events" extractor
 
     /// Extract all objects from an OCEL log
     let private extractObjects (log: XElement) =
-        Map.empty
+        let extractor (event: XElement) = {
+            Type = extractStringValueOfElementWithKey "type" event
+            OvMap = extractArray event "ovmap" tupleExtractor |> Map.ofSeq
+        }
+        extractFromObject log "objects" extractor
 
     /// Validate a XML string against the OCEL XML schema, with error messages
     let private validateXDocumentWithErrorMessages (xDoc: XDocument) =
