@@ -183,14 +183,14 @@ module Xml =
             xElem
 
         /// Create an XElement from an OCEL value and a key
-        let createXElementFromKeyOcelValue key (value: OcelValue) =
+        let createXElementFromKeyOcelValue key value =
             let xElem, strVal =
                 match value with
                 | OcelString s -> XElement "string", s
                 | OcelTimestamp t -> XElement "date", t.ToString("O", CultureInfo.InvariantCulture) // ISO-8601 format identifier
-                | OcelInteger i -> XElement "int", i.ToString(CultureInfo.InvariantCulture) // TODO
-                | OcelFloat f -> XElement "float", f.ToString(CultureInfo.InvariantCulture)
-                | OcelBoolean b -> XElement "bool", b.ToString(CultureInfo.InvariantCulture) // TODO
+                | OcelInteger i -> XElement "int", i.ToString(CultureInfo.InvariantCulture) // TODO: What identifier?
+                | OcelFloat f -> XElement "float", f.ToString(".0###############", CultureInfo.InvariantCulture)
+                | OcelBoolean b -> XElement "bool", b.ToString(CultureInfo.InvariantCulture) // TODO: What identifier?
             xElem.SetAttributeValue("key", key)
             xElem.SetAttributeValue("value", strVal)
             xElem
@@ -202,6 +202,13 @@ module Xml =
             items |> Seq.iter (fun i -> createXElementFromKeyOcelValue itemKey (OcelString i) |> xElem.Add)
             xElem
 
+        /// Create list of different kinds of OCEL elements, given the key for the list and a sequence of OCEL values together with their key value
+        let createXElementListWithDifferentKeys listKey items =
+            let xElem = XElement "list"
+            xElem.SetAttributeValue("key", listKey)
+            items |> Seq.iter (fun (k, v) -> createXElementFromKeyOcelValue k v |> xElem.Add)
+            xElem
+
         /// Create the global log from the OCEL log
         let createGlobalLog (log: OcelLog) =
             let xGlob = XElement "global"
@@ -211,7 +218,35 @@ module Xml =
             createXElementList "object-types" "type" log.ObjectTypes |> xGlob.Add
             xGlob
 
-        /// A default global event
+        /// Create an XElement that contains all events of the OCEL log
+        let createEvents (log: OcelLog) =
+            let createEvent (id, event) =
+                let xElem = XElement "event"
+                createXElementFromKeyOcelValue "id" (OcelString id) |> xElem.Add
+                createXElementFromKeyOcelValue "activity" (OcelString event.Activity) |> xElem.Add
+                createXElementFromKeyOcelValue "timestamp" (OcelTimestamp event.Timestamp) |> xElem.Add
+                createXElementList "omap" "object-id" event.OMap |> xElem.Add
+                createXElementListWithDifferentKeys "vmap" (event.VMap |> Map.toSeq) |> xElem.Add
+                xElem
+
+            let xRoot = XElement "events"
+            log.Events |> Map.iter (fun k v -> createEvent(k, v) |> xRoot.Add)
+            xRoot
+
+        /// Create an XElement that contains all objects of the OCEL log
+        let createObjects (log: OcelLog) =
+            let createObject (id, object) =
+                let xElem = XElement "object"
+                createXElementFromKeyOcelValue "id" (OcelString id) |> xElem.Add
+                createXElementFromKeyOcelValue "type" (OcelString object.Type) |> xElem.Add
+                createXElementListWithDifferentKeys "ovmap" (object.OvMap |> Map.toSeq) |> xElem.Add
+                xElem
+
+            let xRoot = XElement "objects"
+            log.Objects |> Map.iter (fun k v -> createObject(k, v) |> xRoot.Add)
+            xRoot
+
+        // A default global event
         let globalEvent =
             let xElem = XElement "global"
             xElem.SetAttributeValue("scope", "event")
@@ -222,6 +257,7 @@ module Xml =
             xElem.Add(createXElementFromKeyValue "string" "vmap" "__INVALID__")
             xElem
 
+        // A default global object
         let globalObject =
             let xElem = XElement "global"
             xElem.SetAttributeValue("scope", "object")
@@ -230,19 +266,24 @@ module Xml =
             xElem.Add(createXElementFromKeyValue "string" "ovmap" "__INVALID__")
             xElem
 
+        // If the input log isn't valid, it shoudln't be possible to serialize it
         if not log.IsValid then
             failwith "Log is invalid."
 
+        // Create the root document and add an XML declaration
         let xDoc = XDocument()
         xDoc.Declaration <- XDeclaration("1.0", "UTF-8", null)
         let xRoot = XElement("log")
         xDoc.Add xRoot
 
-        // Add actual values to the document by using helper functions
+        // Add actual values to the document by using helper functions and values
         log |> createGlobalLog |> xRoot.Add
         globalEvent |> xRoot.Add
         globalObject |> xRoot.Add
+        createEvents log |> xRoot.Add 
+        createObjects log |> xRoot.Add
 
+        // Serialize to UTF-8 string and verify it against the schema before returning
         let strWriter = new Utf8StringWriter()
         xDoc.Save(strWriter, formatting |> toXmlSaveOptions)
         let xml = strWriter.ToString()
