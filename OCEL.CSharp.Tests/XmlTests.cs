@@ -1,9 +1,10 @@
 ﻿using System.IO;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace OCEL.CSharp.Tests
 {
-    public static class XmlTests
+    public class XmlTests
     {
         public class SchemaValidation
         {
@@ -50,6 +51,13 @@ namespace OCEL.CSharp.Tests
 
         public class Serialization
         {
+            private readonly ITestOutputHelper _output;
+
+            public Serialization(ITestOutputHelper output)
+            {
+                this._output = output;
+            }
+
             [Fact]
             public void CanSerializeSampleLog()
             {
@@ -67,6 +75,8 @@ namespace OCEL.CSharp.Tests
                 var parsed = Xml.Deserialize(xml);
                 var serialized = Xml.Serialize(parsed, Types.Formatting.Indented);
                 var valid = Xml.Validate(serialized);
+                _output.WriteLine("serialized XML:");
+                _output.WriteLine(serialized);
                 Assert.True(valid);
             }
 
