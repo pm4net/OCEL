@@ -13,30 +13,30 @@ module Json =
 
         [<Fact>]
         let ``Sample JSON is valid according to schema`` () =
-            let json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel")
+            let json = File.ReadAllText("minimal.jsonocel")
             json |> Json.validate |> Assert.True
 
     module Deserialization =
 
         [<Fact>]
         let ``Can parse sample JSON`` () =
-            let json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel")
+            let json = File.ReadAllText("minimal.jsonocel")
             json |> Json.deserialize |> Assert.NotNull
 
         [<Fact>]
         let ``Parsed sample JSON satisfies well-formedness property`` () =
-            let json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel")
+            let json = File.ReadAllText("minimal.jsonocel")
             let parsed = Json.deserialize json
             parsed.IsValid |> Assert.True
 
         [<Fact>]
         let ``Can parse "GitHub pm4py" log`` () =
-            let json = File.ReadAllText(@"..\..\..\..\Samples\github_pm4py.jsonocel")
+            let json = File.ReadAllText("github_pm4py.jsonocel")
             json |> Json.deserialize |> Assert.NotNull
 
         [<Fact>]
         let ``Parsed "GitHub pm4py" JSON satisfies well-formedness property`` () =
-            let json = File.ReadAllText(@"..\..\..\..\Samples\github_pm4py.jsonocel")
+            let json = File.ReadAllText("github_pm4py.jsonocel")
             let parsed = Json.deserialize json
             parsed.IsValid |> Assert.True
 
@@ -44,7 +44,7 @@ module Json =
 
         [<Fact>]
         let ``Can serialize sample log`` () =
-            let json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel")
+            let json = File.ReadAllText("minimal.jsonocel")
             json 
             |> Json.deserialize 
             |> Json.serialize Formatting.Indented 
@@ -53,7 +53,7 @@ module Json =
 
         [<Fact>]
         let ``Can serialize sample log and deserialize it again`` () =
-            let json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel")
+            let json = File.ReadAllText("minimal.jsonocel")
             let log = 
                 json
                 |> Json.deserialize 

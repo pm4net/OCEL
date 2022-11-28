@@ -10,7 +10,7 @@ namespace OCEL.CSharp.Tests
             [Fact]
             public void SampleJsonIsValidAccordingToSchema()
             {
-                var json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel");
+                var json = File.ReadAllText("minimal.jsonocel");
                 Assert.True(Json.Validate(json));
             }
         }
@@ -20,14 +20,14 @@ namespace OCEL.CSharp.Tests
             [Fact]
             public void CanParseSampleJson()
             {
-                var json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel");
+                var json = File.ReadAllText("minimal.jsonocel");
                 Assert.NotNull(Json.Deserialize(json));
             }
 
             [Fact]
             public void ParsedSampleJsonSatisfiedWellFormednessProperty()
             {
-                var json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel");
+                var json = File.ReadAllText("minimal.jsonocel");
                 var parsed = Json.Deserialize(json);
                 Assert.True(parsed.IsValid);
             }
@@ -35,14 +35,14 @@ namespace OCEL.CSharp.Tests
             [Fact]
             public void CanParseGitHubPm4PyLog()
             {
-                var json = File.ReadAllText(@"..\..\..\..\Samples\github_pm4py.jsonocel");
+                var json = File.ReadAllText("github_pm4py.jsonocel");
                 Assert.NotNull(Json.Deserialize(json));
             }
 
             [Fact]
             public void ParsedGitHubPm4PyJsonSatisfiedWellFormednessProperty()
             {
-                var json = File.ReadAllText(@"..\..\..\..\Samples\github_pm4py.jsonocel");
+                var json = File.ReadAllText("github_pm4py.jsonocel");
                 var parsed = Json.Deserialize(json);
                 Assert.True(parsed.IsValid);
             }
@@ -53,7 +53,7 @@ namespace OCEL.CSharp.Tests
             [Fact]
             public void CanSerializeSampleLog()
             {
-                var json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel");
+                var json = File.ReadAllText("minimal.jsonocel");
                 var parsed = Json.Deserialize(json);
                 var serialized = Json.Serialize(parsed, Types.Formatting.Indented);
                 Assert.False(string.IsNullOrWhiteSpace(serialized));
@@ -62,7 +62,7 @@ namespace OCEL.CSharp.Tests
             [Fact]
             public void CanSerializeSampleLogAndDeserializeItAgain()
             {
-                var json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel");
+                var json = File.ReadAllText("minimal.jsonocel");
                 var parsed = Json.Deserialize(json);
                 var serialized = Json.Serialize(parsed, Types.Formatting.Indented);
                 var reSerialized = Json.Deserialize(serialized);

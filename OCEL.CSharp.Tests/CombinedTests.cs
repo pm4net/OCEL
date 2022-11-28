@@ -9,7 +9,7 @@ namespace OCEL.CSharp.Tests
         [Fact]
         public static void CanConvertSampleOcelJsonToOcelXml()
         {
-            var json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel");
+            var json = File.ReadAllText("minimal.jsonocel");
             var log = Json.Deserialize(json);
             var xml = Xml.Serialize(log, Formatting.Indented);
             Assert.True(Xml.Validate(xml));
@@ -18,7 +18,7 @@ namespace OCEL.CSharp.Tests
         [Fact]
         public static void CanConvertSampleXmlJsonToOcelJson()
         {
-            var xml = File.ReadAllText(@"..\..\..\..\Samples\minimal.xmlocel");
+            var xml = File.ReadAllText("minimal.xmlocel");
             var log = Xml.Deserialize(xml);
             var json = Json.Serialize(log, Formatting.Indented);
             Assert.True(Json.Validate(json));
