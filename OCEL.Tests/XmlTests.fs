@@ -7,8 +7,6 @@ open System
 open System.IO
 open Xunit
 
-#if !NETSTANDARD // Can not execute tests with .NET Standard
-
 module Xml =
 
     module ``Schema Validation`` =
@@ -47,7 +45,11 @@ module Xml =
         [<Fact>]
         let ``Can serialize sample log`` () =
             let xml = File.ReadAllText(@"..\..\..\..\Samples\minimal.xmlocel")
-            xml |> Xml.deserialize |> Xml.serialize Formatting.Indented |> Assert.NotNull
+            xml 
+            |> Xml.deserialize 
+            |> Xml.serialize Formatting.Indented 
+            |> String.IsNullOrWhiteSpace 
+            |> Assert.False
 
         [<Fact>]
         let ``Can serialize sample log and deserialize it again`` () =
@@ -58,5 +60,3 @@ module Xml =
                 |> Xml.serialize Formatting.Indented
                 |> Xml.deserialize
             log.IsValid |> Assert.True
-
-#endif

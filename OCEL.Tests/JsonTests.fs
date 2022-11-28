@@ -7,8 +7,6 @@ open System
 open System.IO
 open Xunit
 
-#if !NETSTANDARD // Can not execute tests with .NET Standard
-
 module Json =
 
     module ``Schema Validation`` =
@@ -47,7 +45,11 @@ module Json =
         [<Fact>]
         let ``Can serialize sample log`` () =
             let json = File.ReadAllText(@"..\..\..\..\Samples\minimal.jsonocel")
-            json |> Json.deserialize |> Json.serialize Formatting.Indented |> Assert.NotNull
+            json 
+            |> Json.deserialize 
+            |> Json.serialize Formatting.Indented 
+            |> String.IsNullOrWhiteSpace 
+            |> Assert.NotNull
 
         [<Fact>]
         let ``Can serialize sample log and deserialize it again`` () =
@@ -58,5 +60,3 @@ module Json =
                 |> Json.serialize Formatting.Indented
                 |> Json.deserialize
             log.IsValid |> Assert.True
-
-#endif

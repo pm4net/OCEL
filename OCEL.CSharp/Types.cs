@@ -18,7 +18,7 @@ namespace OCEL.CSharp
             Objects = objects;
         }
 
-        internal OcelLog(OCEL.Types.OcelLog log)
+        internal OcelLog(Types.OcelLog log)
         {
             GlobalAttributes = log.GlobalAttributes.ToExplicitDictionary();
             Events = log.Events.ToDictionary(k => k.Key, v => new OcelEvent(v.Value));
@@ -69,7 +69,7 @@ namespace OCEL.CSharp
             VMap = vMap;
         }
 
-        internal OcelEvent(OCEL.Types.OcelEvent ocelEvent)
+        internal OcelEvent(Types.OcelEvent ocelEvent)
         {
             Activity = ocelEvent.Activity;
             Timestamp = ocelEvent.Timestamp;
@@ -94,7 +94,7 @@ namespace OCEL.CSharp
             OvMap = ovMap;
         }
 
-        internal OcelObject(OCEL.Types.OcelObject ocelObject)
+        internal OcelObject(Types.OcelObject ocelObject)
         {
             Type = ocelObject.Type;
             OvMap = ocelObject.OvMap.ToExplicitDictionary();
