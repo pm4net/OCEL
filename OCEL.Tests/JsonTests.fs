@@ -42,7 +42,7 @@ type JsonTests(output: ITestOutputHelper) =
         let json = File.ReadAllText("minimal.jsonocel")
         let parsed = json |> Json.deserialize
         let serialized = parsed |> Json.serialize Formatting.Indented
-        output.WriteLine $"Serialized JSON:{Environment.NewLine}{json}"
+        output.WriteLine $"Serialized JSON:{Environment.NewLine}{serialized}"
         serialized |> Json.validate |> Assert.True
 
     [<Fact>]
@@ -50,7 +50,7 @@ type JsonTests(output: ITestOutputHelper) =
         let json = File.ReadAllText("github_pm4py.jsonocel")
         let parsed = json |> Json.deserialize
         let serialized = parsed |> Json.serialize Formatting.Indented
-        output.WriteLine $"Serialized JSON:{Environment.NewLine}{json}"
+        output.WriteLine $"Serialized JSON:{Environment.NewLine}{serialized}"
         serialized |> Json.validate |> Assert.True
 
     [<Fact>]

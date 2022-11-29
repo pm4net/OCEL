@@ -174,6 +174,11 @@ module Xml =
         | [] -> true, ([]: string seq)
         | _ -> false, errors |> Seq.ofList |> Seq.rev
 
+    /// StringWriter uses UTF-16 by default with no way of changing it. This class inherits and overrides the Encoding of the default StringWriter.
+    type private Utf8StringWriter() =
+        inherit StringWriter()
+        override _.Encoding = System.Text.Encoding.UTF8
+
     (* --- PUBLIC MEMBERS --- *)
 
     /// <inheritdoc />
@@ -200,11 +205,6 @@ module Xml =
                     Objects = extractObjects xElm
                 }
 
-    /// StringWriter uses UTF-16 by default with no way of changing it. This class inherits and overrides the Encoding of the default StringWriter.
-    type private Utf8StringWriter() =
-        inherit StringWriter()
-        override _.Encoding = System.Text.Encoding.UTF8
-        
     /// <inheritdoc />
     let serialize formatting (log: OcelLog) =
         /// Convert custom formatting enum to XML save options

@@ -1,4 +1,4 @@
-# OCEL
+# OCEL.CSharp
 
 [![GitHub](https://img.shields.io/github/license/pm4net/OCEL?style=flat-square)](https://github.com/pm4net/OCEL/blob/master/LICENSE)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/pm4net/OCEL/Run%20Tests?style=flat-square)](https://github.com/pm4net/OCEL/actions/workflows/tests.yml)

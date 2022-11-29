@@ -23,5 +23,5 @@ type CombinedTests(output: ITestOutputHelper) =
         let xml = File.ReadAllText("minimal.xmlocel")
         let log = Xml.deserialize xml
         let json = Json.serialize Formatting.Indented log
-        output.WriteLine $"Serialized JSON:{Environment.NewLine}{xml}"
+        output.WriteLine $"Serialized JSON:{Environment.NewLine}{json}"
         Json.validate json |> Assert.True

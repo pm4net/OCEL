@@ -42,7 +42,7 @@ type XmlTests(output: ITestOutputHelper) =
         let xml = File.ReadAllText("minimal.xmlocel")
         let parsed = xml |> Xml.deserialize
         let serialized = parsed |> Xml.serialize Formatting.Indented
-        output.WriteLine $"Serialized XML:{Environment.NewLine}{xml}"
+        output.WriteLine $"Serialized XML:{Environment.NewLine}{serialized}"
         serialized |> Xml.validate |> Assert.True
 
     [<Fact>]
@@ -50,7 +50,7 @@ type XmlTests(output: ITestOutputHelper) =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
         let parsed = xml |> Xml.deserialize
         let serialized = parsed |> Xml.serialize Formatting.Indented
-        output.WriteLine $"Serialized XML:{Environment.NewLine}{xml}"
+        output.WriteLine $"Serialized XML:{Environment.NewLine}{serialized}"
         serialized |> Xml.validate |> Assert.True
 
     [<Fact>]
