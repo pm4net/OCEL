@@ -1,37 +1,85 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.FSharp.Collections;
 
 namespace OCEL.CSharp
 {
     internal static class FSharpConverters
     {
-        internal static IDictionary<TKey, TValue> ToExplicitDictionary<TKey, TValue>(this IDictionary<TKey, TValue> map)
-        {
-            return new Dictionary<TKey, TValue>(map);
-        }
-
-        internal static Microsoft.FSharp.Collections.FSharpMap<TKey, TValue> ToFSharpMap<TKey, TValue>(this IDictionary<TKey, TValue> dict)
-        {
-            return new Microsoft.FSharp.Collections.FSharpMap<TKey, TValue>(
-                dict.Select(x => new Tuple<TKey, TValue>(x.Key, x.Value)));
-        }
-
+        /// <summary>
+        /// Create C# instance of an OCEL log from an F# OCEL log
+        /// </summary>
+        /// <param name="log">The F# OCEL log</param>
+        /// <returns>A C# OCEL log</returns>
         internal static OcelLog FromFSharpOcelLog(this Types.OcelLog log)
         {
             return new OcelLog(log);
         }
 
+        /// <summary>
+        /// Create a F# instance of an OCEL log from a C# OCEL log
+        /// </summary>
+        /// <param name="log">The C# OCEL log</param>
+        /// <returns>A F# OCEL log</returns>
         internal static Types.OcelLog ToFSharpOcelLog(this OcelLog log)
         {
             return new Types.OcelLog(
-                globalAttributes: log.GlobalAttributes.ToFSharpMap(), 
-                events: log.Events.ToDictionary(k => k.Key, v => new Types.OcelEvent(
-                    v.Value.Activity, v.Value.Timestamp, v.Value.OMap, v.Value.VMap.ToFSharpMap()))
-                    .ToFSharpMap(), 
-                objects: log.Objects.ToDictionary(k => k.Key, v => new Types.OcelObject(
-                        v.Value.Type, v.Value.OvMap.ToFSharpMap()))
+                globalAttributes: log.GlobalAttributes.ToFSharpMap(),
+                events: log.Events.ToDictionary(
+                        k => k.Key, 
+                        v => new Types.OcelEvent(
+                            v.Value.Activity, 
+                            v.Value.Timestamp, 
+                            v.Value.OMap, 
+                            v.Value.VMap.ToFSharpMap()))
+                    .ToFSharpMap(),
+                objects: log.Objects.ToDictionary(
+                    k => k.Key, 
+                    v => new Types.OcelObject(
+                        v.Value.Type, 
+                        v.Value.OvMap.ToFSharpMap()))
                     .ToFSharpMap());
+        }
+
+        /// <summary>
+        /// Convert a generic dictionary to a generic F# map
+        /// </summary>
+        private static FSharpMap<TKey, TValue> ToFSharpMap<TKey, TValue>(this IDictionary<TKey, TValue> dict)
+        {
+            return new FSharpMap<TKey, TValue>(dict.Select(x => new Tuple<TKey, TValue>(x.Key, x.Value)));
+        }
+
+        /// <summary>
+        /// Convert a dictionary with a string and OcelValue to an F# map where the OcelValue is mapped to the F# OcelValue
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <returns></returns>
+        private static FSharpMap<string, Types.OcelValue> ToFSharpMap(this IDictionary<string, OcelValue> dict)
+        {
+            return dict.ToDictionary(x => x.Key, x => x.Value.FromCSharpOcelValue()).ToFSharpMap();
+        }
+
+        /// <summary>
+        /// Convert a C# OcelValue to the F# equivalent
+        /// </summary>
+        private static Types.OcelValue FromCSharpOcelValue(this OcelValue v)
+        {
+            switch (v)
+            {
+                case OcelString s:
+                    return Types.OcelValue.NewOcelString(s.Value);
+                case OcelTimestamp t:
+                    return Types.OcelValue.NewOcelTimestamp(t.Value);
+                case OcelInteger i:
+                    return Types.OcelValue.NewOcelInteger(i.Value);
+                case OcelFloat f:
+                    return Types.OcelValue.NewOcelFloat(f.Value);
+                case OcelBoolean b:
+                    return Types.OcelValue.NewOcelBoolean(b.Value);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(v));
+            }
         }
     }
 }

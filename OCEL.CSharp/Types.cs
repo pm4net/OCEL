@@ -20,7 +20,7 @@ namespace OCEL.CSharp
 
         internal OcelLog(Types.OcelLog log)
         {
-            GlobalAttributes = log.GlobalAttributes.ToExplicitDictionary();
+            GlobalAttributes = log.GlobalAttributes.ToDictionary(x => x.Key, x => (OcelValue) x.Value);
             Events = log.Events.ToDictionary(k => k.Key, v => new OcelEvent(v.Value));
             Objects = log.Objects.ToDictionary(k => k.Key, v => new OcelObject(v.Value));
         }
@@ -74,7 +74,7 @@ namespace OCEL.CSharp
             Activity = ocelEvent.Activity;
             Timestamp = ocelEvent.Timestamp;
             OMap = ocelEvent.OMap;
-            VMap = ocelEvent.VMap.ToExplicitDictionary();
+            VMap = ocelEvent.VMap.ToDictionary(x => x.Key, x => (OcelValue) x.Value);
         }
 
         public string Activity { get; set; }
@@ -97,11 +97,83 @@ namespace OCEL.CSharp
         internal OcelObject(Types.OcelObject ocelObject)
         {
             Type = ocelObject.Type;
-            OvMap = ocelObject.OvMap.ToExplicitDictionary();
+            OvMap = ocelObject.OvMap.ToDictionary(x => x.Key, x => (OcelValue) x.Value);
         }
 
         public string Type { get; set; }
 
         public IDictionary<string, OcelValue> OvMap { get; set; }
+    }
+
+    public abstract class OcelValue
+    {
+        public static explicit operator OcelValue(Types.OcelValue v)
+        {
+            switch (v)
+            {
+                case Types.OcelValue.OcelString s:
+                    return new OcelString(s.Item);
+                case Types.OcelValue.OcelTimestamp t:
+                    return new OcelTimestamp(t.Item);
+                case Types.OcelValue.OcelInteger i:
+                    return new OcelInteger(i.Item);
+                case Types.OcelValue.OcelFloat f:
+                    return new OcelFloat(f.Item);
+                case Types.OcelValue.OcelBoolean b:
+                    return new OcelBoolean(b.Item);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(v));
+            }
+        }
+    }
+
+    public class OcelString : OcelValue
+    {
+        public OcelString(string value)
+        {
+            Value = value;
+        }
+
+        public string Value { get; set; }
+    }
+
+    public class OcelTimestamp : OcelValue
+    {
+        public OcelTimestamp(DateTimeOffset value)
+        {
+            Value = value;
+        }
+
+        public DateTimeOffset Value { get; set; }
+    }
+
+    public class OcelInteger : OcelValue
+    {
+        public OcelInteger(long value)
+        {
+            Value = value;
+        }
+
+        public long Value { get; set; }
+    }
+
+    public class OcelFloat : OcelValue
+    {
+        public OcelFloat(double value)
+        {
+            Value = value;
+        }
+
+        public double Value { get; set; }
+    }
+
+    public class OcelBoolean : OcelValue
+    {
+        public OcelBoolean(bool value)
+        {
+            Value = value;
+        }
+
+        public bool Value { get; set; }
     }
 }
