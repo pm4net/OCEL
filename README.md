@@ -48,7 +48,7 @@ var valid = OCEL.CSharp.Json.Validate(json);
 var (valid, errors) = OCEL.CSharp.Xml.ValidateWithErrorMessages(xml);
 ```
 
-## Parsing JSON-OCEL and XML-OCEL string (F# and C#)
+## Parsing a JSON-OCEL and XML-OCEL string (F# and C#)
 
 ```fsharp
 let json = File.ReadAllText("minimal.jsonocel")
