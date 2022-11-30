@@ -2,9 +2,16 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>OCEL</PackageId>
+    <Title>Object-Centric Event Log (OCEL) library for F#</Title>
+    <Authors>johannesmols</Authors>
+    <Copyright>Copyright (c) Johannes Mols 2022</Copyright>
+    <PackageTags>process-mining pm ocel</PackageTags>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageDescription>Object-Centric Event Log (OCEL) is a standard interchange format for object-centric event data with multiple case notions. This library aims to implement this standard in .NET with a high degree of type safety.</PackageDescription>
+    <PackageProjectUrl>https://github.com/pm4net/OCEL</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pm4net/OCEL.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
