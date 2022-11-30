@@ -325,7 +325,4 @@ module Xml =
         // Serialize to UTF-8 string and verify it against the schema before returning
         let strWriter = new Utf8StringWriter()
         xDoc.Save(strWriter, formatting |> toXmlSaveOptions)
-        let xml = strWriter.ToString()
-        match xml |> validateWithErrorMessages with
-        | true, _ -> xml
-        | false, errors -> failwith $"""Serialized XML could not be validated by the OCEL schema. Errors: {Environment.NewLine}{errors |> String.concat Environment.NewLine}.{Environment.NewLine}XML:{Environment.NewLine}{xml}"""
+        strWriter.ToString()

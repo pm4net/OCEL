@@ -16,6 +16,11 @@ type JsonTests(output: ITestOutputHelper) =
         json |> Json.validate |> Assert.True
 
     [<Fact>]
+    member __.``"GitHub pm4py" JSON is valid according to schema`` () =
+        let json = File.ReadAllText("github_pm4py.jsonocel")
+        json |> Json.validate |> Assert.True
+
+    [<Fact>]
     member __.``Can parse sample JSON`` () =
         let json = File.ReadAllText("minimal.jsonocel")
         json |> Json.deserialize |> Assert.NotNull

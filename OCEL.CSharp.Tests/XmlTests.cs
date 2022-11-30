@@ -22,6 +22,13 @@ namespace OCEL.CSharp.Tests
         }
 
         [Fact]
+        public void GitHubPm4PyXmlIsValidAccordingToSchema()
+        {
+            var xml = File.ReadAllText("github_pm4py.xmlocel");
+            Assert.True(Xml.Validate(xml));
+        }
+
+        [Fact]
         public void CanParseSampleXml()
         {
             var xml = File.ReadAllText("minimal.xmlocel");

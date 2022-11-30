@@ -218,7 +218,4 @@ module Json =
         jObj["ocel:events"] <- createEvents log
         jObj["ocel:objects"] <- createObjects log
         
-        let json = jObj.ToString (formatting |> toNewtonSoftFormatting)
-        match json |> validateWithErrorMessages with
-        | true, _ -> json
-        | false, errors -> failwith $"""Serialized JSON could not be validated by the OCEL schema. Errors: {Environment.NewLine}{errors |> String.concat Environment.NewLine}"""
+        jObj.ToString (formatting |> toNewtonSoftFormatting)

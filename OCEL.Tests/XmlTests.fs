@@ -16,6 +16,11 @@ type XmlTests(output: ITestOutputHelper) =
         xml |> Xml.validate |> Assert.True
 
     [<Fact>]
+    member __.``"GitHub pm4py" XML is valid according to schema`` () =
+        let xml = File.ReadAllText("github_pm4py.xmlocel")
+        xml |> Xml.validate |> Assert.True
+
+    [<Fact>]
     member __.``Can parse sample XML`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         xml |> Xml.deserialize |> Assert.NotNull
@@ -32,7 +37,7 @@ type XmlTests(output: ITestOutputHelper) =
         xml |> Xml.deserialize |> Assert.NotNull
 
     [<Fact>]
-    member __.``Parsed "GitHub pm4py" JSON satisfies well-formedness property`` () =
+    member __.``Parsed "GitHub pm4py" XML satisfies well-formedness property`` () =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
         let parsed = Xml.deserialize xml
         parsed.IsValid |> Assert.True

@@ -22,6 +22,13 @@ namespace OCEL.CSharp.Tests
         }
 
         [Fact]
+        public void GitHubPm4PyJsonIsValidAccordingToSchema()
+        {
+            var json = File.ReadAllText("github_pm4py.jsonocel");
+            Assert.True(Json.Validate(json));
+        }
+
+        [Fact]
         public void CanParseSampleJson()
         {
             var json = File.ReadAllText("minimal.jsonocel");
