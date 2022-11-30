@@ -328,4 +328,4 @@ module Xml =
         let xml = strWriter.ToString()
         match xml |> validateWithErrorMessages with
         | true, _ -> xml
-        | false, errors -> failwith $"""Serialized XML could not be validated by the OCEL schema. Errors: {Environment.NewLine}{errors |> String.concat Environment.NewLine}"""
+        | false, errors -> failwith $"""Serialized XML could not be validated by the OCEL schema. Errors: {Environment.NewLine}{errors |> String.concat Environment.NewLine}.{Environment.NewLine}XML:{Environment.NewLine}{xml}"""
