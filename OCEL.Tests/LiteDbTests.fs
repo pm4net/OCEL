@@ -12,16 +12,16 @@ type LiteDbTests(output: ITestOutputHelper) =
     [<Fact>]
     member __.``Can serialize basic log`` () =
         let log = {
-            GlobalAttributes = Map.empty
+            GlobalAttributes = ["version", OcelString "1.0"; "ordering", OcelString "timestamp"] |> Map.ofSeq
             Events = 
                 ["e1", {
                     Activity = "Add to cart"
-                    Timestamp = DateTimeOffset.UtcNow
+                    Timestamp = DateTimeOffset.Now
                     OMap = ["item1"]
                     VMap = ["price", OcelFloat 13.37] |> Map.ofList
                 }; "e2", {
                     Activity = "Submit order"
-                    Timestamp = DateTimeOffset.UtcNow.AddMinutes 1
+                    Timestamp = DateTimeOffset.Now.AddMinutes 1
                     OMap = []
                     VMap = Map.empty
                 }]
@@ -33,5 +33,5 @@ type LiteDbTests(output: ITestOutputHelper) =
                 }]
                 |> Map.ofList
         }
-        let db = OCEL.LiteDB.serialize (new LiteDatabase(":memory:")) log
+        let db = OCEL.LiteDB.serialize (new LiteDatabase(@"C:\Temp\MyData.db")) log
         true
