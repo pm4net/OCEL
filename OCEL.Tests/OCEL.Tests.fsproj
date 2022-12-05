@@ -10,6 +10,7 @@
     <Compile Include="CombinedTests.fs" />
     <Compile Include="JsonTests.fs" />
     <Compile Include="XmlTests.fs" />
+    <Compile Include="LiteDbTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
