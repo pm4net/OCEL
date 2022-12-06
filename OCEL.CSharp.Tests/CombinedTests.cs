@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using LiteDB;
 using OCEL.Types;
 using Xunit;
 using Xunit.Abstractions;
@@ -35,6 +36,24 @@ namespace OCEL.CSharp.Tests
             var valid = Json.Validate(json);
             _output.WriteLine($"Serialized JSON:{Environment.NewLine}{json}");
             Assert.True(valid);
+        }
+
+        [Fact]
+        public void CanConvertSampleOcelJsonToLiteDb()
+        {
+            var json = File.ReadAllText("minimal.jsonocel");
+            var log = Json.Deserialize(json);
+            var liteDb = new LiteDatabase(":memory:");
+            LiteDB.Serialize(liteDb, log);
+        }
+
+        [Fact]
+        public void CanConvertSampleOcelXmlToLiteDb()
+        {
+            var xml = File.ReadAllText("minimal.xmlocel");
+            var log = Xml.Deserialize(xml);
+            var liteDb = new LiteDatabase(":memory:");
+            LiteDB.Serialize(liteDb, log);
         }
     }
 }
