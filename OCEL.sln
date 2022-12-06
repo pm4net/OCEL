@@ -11,8 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Schemas", "Schemas", "{F22B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{7D108089-3A23-4E2F-8F6C-44CBC106D439}"
 	ProjectSection(SolutionItems) = preProject
+		Samples\github_pm4py.db = Samples\github_pm4py.db
 		Samples\github_pm4py.jsonocel = Samples\github_pm4py.jsonocel
 		Samples\github_pm4py.xmlocel = Samples\github_pm4py.xmlocel
+		Samples\minimal.db = Samples\minimal.db
 		Samples\minimal.jsonocel = Samples\minimal.jsonocel
 		Samples\minimal.xmlocel = Samples\minimal.xmlocel
 	EndProjectSection

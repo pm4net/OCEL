@@ -10,7 +10,7 @@ open Xunit.Abstractions
 type LiteDbTests(output: ITestOutputHelper) =
 
     [<Fact>]
-    member _.``Can serialize and deserialize basic log`` () =
+    member _.``Can serialize and deserialize basic log in memory`` () =
         let log = {
             GlobalAttributes = ["version", OcelString "1.0"; "ordering", OcelString "timestamp"] |> Map.ofSeq
             Events = 

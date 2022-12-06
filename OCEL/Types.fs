@@ -19,28 +19,33 @@ type OcelValue =
 
 type OcelAttributes = Map<string, OcelValue>
 
+[<CustomEquality; NoComparison>]
 type OcelEvent = {
     Activity: string
     Timestamp: DateTimeOffset
     OMap: string seq
     VMap: OcelAttributes
-}
+} with
+    override this.Equals(other) =
+        match other with
+        | :? OcelEvent as e ->
+            this.Activity = e.Activity &&
+            this.Timestamp = e.Timestamp &&
+            this.VMap = e.VMap &&
+            (this.OMap, e.OMap) ||> Seq.compareWith Operators.compare = 0
+        | _ -> false
+    override this.GetHashCode() = hash this
 
 type OcelObject = {
     Type: string
     OvMap: OcelAttributes
 }
 
-[<CustomEquality; NoComparison>]
 type OcelLog = {
     GlobalAttributes: OcelAttributes
     Events: Map<string, OcelEvent>
     Objects: Map<string, OcelObject>
-} with
-    override this.Equals(other) =
-        true // TODO
-    override this.GetHashCode() =
-        0 // TODO
+}
 
 // Extending types with properties and functions
 
