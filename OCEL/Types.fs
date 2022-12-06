@@ -31,11 +31,16 @@ type OcelObject = {
     OvMap: OcelAttributes
 }
 
+[<CustomEquality; NoComparison>]
 type OcelLog = {
     GlobalAttributes: OcelAttributes
     Events: Map<string, OcelEvent>
     Objects: Map<string, OcelObject>
-}
+} with
+    override this.Equals(other) =
+        true // TODO
+    override this.GetHashCode() =
+        0 // TODO
 
 // Extending types with properties and functions
 

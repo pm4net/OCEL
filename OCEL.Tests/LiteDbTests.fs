@@ -10,7 +10,7 @@ open Xunit.Abstractions
 type LiteDbTests(output: ITestOutputHelper) =
 
     [<Fact>]
-    member __.``Can serialize basic log`` () =
+    member _.``Can serialize and deserialize basic log`` () =
         let log = {
             GlobalAttributes = ["version", OcelString "1.0"; "ordering", OcelString "timestamp"] |> Map.ofSeq
             Events = 
@@ -18,7 +18,7 @@ type LiteDbTests(output: ITestOutputHelper) =
                     Activity = "Add to cart"
                     Timestamp = DateTimeOffset.Now
                     OMap = ["item1"]
-                    VMap = ["price", OcelFloat 13.37] |> Map.ofList
+                    VMap = ["price", OcelFloat 13.37; "added on", OcelTimestamp DateTimeOffset.Now] |> Map.ofList
                 }; "e2", {
                     Activity = "Submit order"
                     Timestamp = DateTimeOffset.Now.AddMinutes 1
@@ -29,9 +29,13 @@ type LiteDbTests(output: ITestOutputHelper) =
             Objects =
                 ["item1", {
                     Type = "Item"
-                    OvMap = Map.empty
+                    OvMap = ["Cheese", OcelInteger 12] |> Map.ofList
                 }]
                 |> Map.ofList
         }
-        let db = OCEL.LiteDB.serialize (new LiteDatabase(@"C:\Temp\MyData.db")) log
-        true
+
+        let db = new LiteDatabase(":memory:")
+        OCEL.LiteDB.serialize db log
+        let deserializedLog = OCEL.LiteDB.deserialize db
+        deserializedLog.IsValid |> Assert.True
+        log.Equals deserializedLog |> Assert.True

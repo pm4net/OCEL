@@ -5,35 +5,10 @@ open LiteDB
 open OCEL.Types
 
 module LiteDB =
-
+    
     (* --- PRIVATE MEMBERS --- *)
 
-    
-    (* --- PUBLIC MEMBERS --- *)
-    
-    /// <inheritdoc />
-    let validateWithErrorMessage (db: LiteDatabase) =
-        true, [""] |> Seq.ofList
-        
-    /// <inheritdoc />
-    let validate (db: LiteDatabase) =
-        true
-    
-    /// <inheritdoc />
-    let deserialize (db: LiteDatabase)  =
-        {
-            GlobalAttributes = Map.empty
-            Events = Map.empty
-            Objects = Map.empty
-        }
-    
-    /// <inheritdoc />
-    let serialize (db: LiteDatabase) (log: OcelLog) =
-        (*BsonMapper.Global.Entity<string * OcelEvent>()
-            .Id(fun (id, _) -> id)
-            .Field((fun (id, event) -> "", ""), "")
-            |> ignore*)
-
+    let private configureBsonmapper() =
         // Custom DateTimeOffset handler (https://github.com/mbdavid/LiteDB/issues/1686#issuecomment-642215514)
         BsonMapper.Global.RegisterType<DateTimeOffset>(
             fun dto ->
@@ -45,33 +20,55 @@ module LiteDB =
             fun doc -> DateTimeOffset(doc["DateTime"].AsInt64, TimeSpan(doc["Offset"].AsInt64))
         )
 
-        // Custom OcelValue handler to reduce size of stored data
+        // Custom OcelValue handler to reduce size of stored data (otherwise excludes internal properties like IsOcelString, IsOcelTimestamp, ...)
         BsonMapper.Global.RegisterType<OcelValue>(
             fun value ->
                 let doc = BsonDocument()
-                doc["type"] <- 
-                    match value with
-                    | OcelString _ -> "s"
-                    | OcelTimestamp _ -> "t"
-                    | OcelInteger _ -> "i"
-                    | OcelFloat _ -> "f"
-                    | OcelBoolean _ -> "b"
-                doc["val"] <- value.ToString()
+                match value with
+                | OcelString s ->
+                    doc["type"] <- nameof(OcelString)
+                    doc["val"] <- s
+                | OcelTimestamp t -> 
+                    doc["type"] <- nameof(OcelTimestamp)
+                    doc["val"] <- BsonMapper.Global.ToDocument t
+                | OcelInteger i -> 
+                    doc["type"] <- nameof(OcelInteger)
+                    doc["val"] <- i
+                | OcelFloat f -> 
+                    doc["type"] <- nameof(OcelFloat)
+                    doc["val"] <- f
+                | OcelBoolean b -> 
+                    doc["type"] <- nameof(OcelBoolean)
+                    doc["val"] <- b
                 doc
             ,
-            fun doc -> OcelString "" // TODO
+            fun doc ->
+                match doc["type"].AsString, doc["val"] with
+                | nameof(OcelString), v -> OcelString v.AsString
+                | nameof(OcelTimestamp), v -> BsonMapper.Global.Deserialize<DateTimeOffset> v |> OcelTimestamp
+                | nameof(OcelInteger), v -> OcelInteger v.AsInt64
+                | nameof(OcelFloat), v -> OcelFloat v.AsDouble
+                | nameof(OcelBoolean), v -> OcelBoolean v.AsBoolean
+                | _ -> raise (ArgumentOutOfRangeException "type")
         )
 
-        // TODO
+        // Custom OcelAttributes handler
         BsonMapper.Global.RegisterType<OcelAttributes>(
             fun map ->
                 let doc = BsonDocument()
-                doc["test"] <- "test"
+                map |> Map.iter (fun id value -> doc[id] <- BsonMapper.Global.ToDocument value)
                 doc
             ,
-            fun doc -> Map.empty
+            fun doc ->
+                match doc with
+                | :? BsonDocument as doc -> 
+                    doc 
+                    |> Seq.map (fun kv -> kv.Key, kv.Value |> BsonMapper.Global.Deserialize<OcelValue>)
+                    |> Map.ofSeq
+                | _ -> Map.empty
         )
 
+        // Custom Events handler
         BsonMapper.Global.RegisterType<string * OcelEvent>(
             fun (id, event) ->
                 let doc = BsonDocument()
@@ -82,13 +79,70 @@ module LiteDB =
                 doc["vmap"] <- BsonMapper.Global.ToDocument event.VMap
                 doc
             ,
-            fun doc -> doc["_id"].AsString, { Activity = ""; Timestamp = DateTimeOffset.Now; OMap = []; VMap = Map.empty })
+            fun doc -> doc["_id"].AsString, { 
+                Activity = doc["activity"].AsString
+                Timestamp = BsonMapper.Global.Deserialize<DateTimeOffset> doc["timestamp"]
+                OMap = doc["omap"].AsArray |> Seq.map (fun o -> o.AsString)
+                VMap = BsonMapper.Global.Deserialize<OcelAttributes> doc["vmap"]
+            })
+
+        // Custom Objects handler
+        BsonMapper.Global.RegisterType<string * OcelObject>(
+            fun (id, obj) ->
+                let doc = BsonDocument()
+                doc["_id"] <- id
+                doc["type"] <- obj.Type
+                doc["ovmap"] <- BsonMapper.Global.ToDocument obj.OvMap
+                doc
+            ,
+            fun doc -> doc["_id"].AsString, { 
+                Type = doc["type"].AsString
+                OvMap = BsonMapper.Global.Deserialize<OcelAttributes> doc["ovmap"]
+            }
+        )
+
+        // Custom GlobalAttributes handler
+        BsonMapper.Global.RegisterType<string * OcelValue>(
+            fun (key, value) ->
+                let doc = BsonDocument()
+                doc["_id"] <- key
+                doc["val"] <- BsonMapper.Global.ToDocument value
+                doc
+            ,
+            fun doc -> doc["_id"].AsString, doc["val"] |> BsonMapper.Global.Deserialize<OcelValue>
+        )
+    
+    (* --- PUBLIC MEMBERS --- *)
+    
+    /// <inheritdoc />
+    let validateWithErrorMessage (db: LiteDatabase) =
+        true, [""] |> Seq.ofList // TODO
+        
+    /// <inheritdoc />
+    let validate (db: LiteDatabase) =
+        true // TODO
+    
+    /// <inheritdoc />
+    let deserialize (db: LiteDatabase)  =
+        configureBsonmapper()
+        {
+            GlobalAttributes = db.GetCollection<string * OcelValue>("global_attributes").FindAll() |> Map.ofSeq
+            Events = db.GetCollection<string * OcelEvent>("events").FindAll() |> Map.ofSeq
+            Objects = db.GetCollection<string * OcelObject>("objects").FindAll() |> Map.ofSeq
+        }
+    
+    /// <inheritdoc />
+    let serialize (db: LiteDatabase) (log: OcelLog) =
+        configureBsonmapper()
 
         let eventsColl = db.GetCollection<string * OcelEvent>("events")
         log.Events |> Map.toSeq |> eventsColl.InsertBulk |> ignore
-
+        eventsColl.EnsureIndex("event_activities", "$.events.activity", false) |> ignore
+        eventsColl.EnsureIndex("event_objects", "$.events.omap", false) |> ignore
+        
         let objectsColl = db.GetCollection<string * OcelObject>("objects")
         log.Objects |> Map.toSeq |> objectsColl.InsertBulk |> ignore
+        objectsColl.EnsureIndex("object_types", "$.objects.type", false) |> ignore
 
-        let othersColl = db.GetCollection<string * OcelValue>("others")
-        log.GlobalAttributes |> Map.toSeq |> othersColl.InsertBulk |> ignore
+        let globalAttrsColl = db.GetCollection<string * OcelValue>("global_attributes")
+        log.GlobalAttributes |> Map.toSeq |> globalAttrsColl.InsertBulk |> ignore
