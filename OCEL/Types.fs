@@ -93,7 +93,7 @@ type OcelLog with
         let objectAttributes =
             this.Objects
             |> Map.toSeq
-            |> Seq.map (fun (_, v) -> v.OvMap.Keys)
+            |> Seq.map (fun (_, v) -> v.OvMap |> extractKeysFromMapping)
             |> Seq.concat
         
         Set.ofSeq eventAttributes + Set.ofSeq objectAttributes

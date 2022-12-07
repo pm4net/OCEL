@@ -37,7 +37,7 @@ namespace OCEL.CSharp
         public ISet<string> AttributeNames =>
             new HashSet<string>(
                 Events.SelectMany(e => ExtractKeysFromMapping(e.Value.VMap)).Union(
-                    Objects.SelectMany(o => o.Value.OvMap.Keys)));
+                    Objects.SelectMany(o => ExtractKeysFromMapping(o.Value.OvMap))));
 
         /// <summary>
         /// The set of all object types in the log
