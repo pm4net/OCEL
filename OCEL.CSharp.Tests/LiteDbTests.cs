@@ -92,5 +92,13 @@ namespace OCEL.CSharp.Tests
             OcelLiteDB.Serialize(db, Log);
             TestCorrectNumberOfElements(db, Log);
         }
+
+        [Fact]
+        public void SerializedBasicLogIsValid()
+        {
+            var db = new LiteDatabase(":memory:");
+            OcelLiteDB.Serialize(db, Log);
+            Assert.True(OcelLiteDB.Validate(db));
+        }
     }
 }

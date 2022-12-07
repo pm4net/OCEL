@@ -116,19 +116,23 @@ module OcelLiteDB =
     
     /// <inheritdoc />
     let validateWithErrorMessage (db: LiteDatabase) =
-        true, [""] |> Seq.ofList // TODO
+        let mutable errors = []
+        if db.CollectionExists "events" |> not then errors <- "Collection 'events' does not exist." :: errors
+        if db.CollectionExists "objects" |> not then errors <- "Collection 'objects' does not exist." :: errors
+        if db.CollectionExists "global_attributes" |> not then errors <- "Collection 'global_attributes' does not exist." :: errors
+        errors.IsEmpty, errors |> List.rev :> seq<_>
         
     /// <inheritdoc />
     let validate (db: LiteDatabase) =
-        true // TODO
+        db |> validateWithErrorMessage |> fst
     
     /// <inheritdoc />
     let deserialize (db: LiteDatabase)  =
         configureBsonmapper()
         {
-            GlobalAttributes = db.GetCollection<string * OcelValue>("global_attributes").FindAll() |> Map.ofSeq
             Events = db.GetCollection<string * OcelEvent>("events").FindAll() |> Map.ofSeq
             Objects = db.GetCollection<string * OcelObject>("objects").FindAll() |> Map.ofSeq
+            GlobalAttributes = db.GetCollection<string * OcelValue>("global_attributes").FindAll() |> Map.ofSeq
         }
     
     /// <inheritdoc />

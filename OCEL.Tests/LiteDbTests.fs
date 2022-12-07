@@ -71,3 +71,9 @@ type LiteDbTests(output: ITestOutputHelper) =
         let db = new LiteDatabase(":temp:")
         OCEL.OcelLiteDB.serialize db log
         testCorrectNumberOfElements db log
+
+    [<Fact>]
+    member _.``Serialized basic log is valid`` () =
+        let db = new LiteDatabase(":memory:")
+        OCEL.OcelLiteDB.serialize db log
+        OCEL.OcelLiteDB.validate db |> Assert.True

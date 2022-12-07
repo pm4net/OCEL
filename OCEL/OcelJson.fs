@@ -113,7 +113,7 @@ module OcelJson =
     let private validateJObjectWithErrorMessages (jObj: JObject) =
         let mutable errors : System.Collections.Generic.IList<string> = Array.empty
         let valid = jObj.IsValid(Schema, &errors)
-        (valid, errors :> seq<_>)
+        valid, errors :> seq<_>
 
     (* --- PUBLIC MEMBERS --- *)
 
