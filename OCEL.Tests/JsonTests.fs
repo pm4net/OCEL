@@ -53,6 +53,7 @@ type JsonTests(output: ITestOutputHelper) =
         let json = File.ReadAllText("minimal_nested.jsonocel")
         let parsed = OcelJson.deserialize json
         let serialized = OcelJson.serialize Formatting.Indented parsed
+        output.WriteLine $"Serialized JSON:{Environment.NewLine}{serialized}"
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
     [<Fact>]

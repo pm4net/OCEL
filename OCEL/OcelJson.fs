@@ -40,6 +40,7 @@ module OcelJson =
         | JTokenType.Boolean -> OcelBoolean(token.Value<bool>())
         | JTokenType.Date -> OcelTimestamp(token.Value<DateTimeOffset>())
         | JTokenType.Array -> OcelList(token.Value<seq<JToken>>() |> Seq.map extractValueFromToken)
+        | JTokenType.Object -> OcelMap(token.Value<JObject>().Children<JProperty>() |> Seq.map (fun p -> p.Name, extractValueFromToken p.First) |> Map.ofSeq)
         | _ -> failwith $"Type {token.Type} on attributes not supported."
 
     /// Extract a map of values from a list of properties
@@ -150,6 +151,7 @@ module OcelJson =
             | OcelFloat f -> JToken.FromObject f
             | OcelBoolean b -> JToken.FromObject b
             | OcelList l -> JArray(l |> Seq.map (fun o -> createTokenFromOcelValue o))
+            | OcelMap m -> JObject(m |> Seq.map (fun x -> JProperty(x.Key, createTokenFromOcelValue x.Value)))
 
         /// Construct the global log object
         let createGlobalLog log =

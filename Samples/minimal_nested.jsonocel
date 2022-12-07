@@ -38,10 +38,17 @@
       "ocel:vmap": {
         "resource": "Alessandro",
         "prepaid-amount": 200.0,
-        "nested": [
+        "nested-list": [
           true,
           false
-        ]
+        ],
+        "nested-map": {
+          "resource": "Nested Alessandro",
+          "prepaid-amount": 300.0,
+          "double-nested-list": [
+            500
+          ]
+        }
       }
     },
     "e2": {

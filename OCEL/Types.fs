@@ -54,10 +54,22 @@ type OcelLog = {
 type OcelLog with
     /// The set of all attribute names used in both events and objects in the log
     member this.AttributeNames =
+        let rec extractKeysFromValue v =
+            match v with
+            | OcelList l -> l |> Seq.collect extractKeysFromValue |> Seq.toList
+            | OcelMap m -> m |> extractKeysFromMapping
+            | _ -> []
+
+        and extractKeysFromMapping attrs =
+            attrs
+            |> Map.toList
+            |> List.map (fun (k, v) -> k :: extractKeysFromValue v)
+            |> List.concat
+
         let eventAttributes =
             this.Events
             |> Map.toSeq
-            |> Seq.map (fun (_, v) -> v.VMap.Keys)
+            |> Seq.map (fun (_, v) -> v.VMap |> extractKeysFromMapping)
             |> Seq.concat
 
         let objectAttributes =
