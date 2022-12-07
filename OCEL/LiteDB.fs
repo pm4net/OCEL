@@ -133,16 +133,22 @@ module LiteDB =
     
     /// <inheritdoc />
     let serialize (db: LiteDatabase) (log: OcelLog) =
+        let insertConditional (cond: ILiteCollection<'a> -> 'a -> bool) coll objs =
+            objs |> Seq.filter (cond coll) |> coll.InsertBulk
+
+        let skipDuplicateId (coll: ILiteCollection<'a>) (obj: string * 'b) = 
+            fst obj |> coll.FindById :> obj = null
+
         configureBsonmapper()
 
         let eventsColl = db.GetCollection<string * OcelEvent>("events")
-        log.Events |> Map.toSeq |> eventsColl.InsertBulk |> ignore
+        (eventsColl, log.Events |> Map.toSeq) ||> insertConditional skipDuplicateId |> ignore
         eventsColl.EnsureIndex("event_activities", "$.events.activity", false) |> ignore
         eventsColl.EnsureIndex("event_objects", "$.events.omap", false) |> ignore
         
         let objectsColl = db.GetCollection<string * OcelObject>("objects")
-        log.Objects |> Map.toSeq |> objectsColl.InsertBulk |> ignore
+        (objectsColl, log.Objects |> Map.toSeq) ||> insertConditional skipDuplicateId |> ignore
         objectsColl.EnsureIndex("object_types", "$.objects.type", false) |> ignore
 
         let globalAttrsColl = db.GetCollection<string * OcelValue>("global_attributes")
-        log.GlobalAttributes |> Map.toSeq |> globalAttrsColl.InsertBulk |> ignore
+        (globalAttrsColl, log.GlobalAttributes |> Map.toSeq) ||> insertConditional skipDuplicateId |> ignore

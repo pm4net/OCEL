@@ -18,33 +18,79 @@ namespace OCEL.CSharp.Tests
             _output = output;
         }
 
-        [Fact]
-        public void CanSerializeAndDeserializeBasicLogInMemory()
+        private static readonly OcelLog Log = new(
+            new Dictionary<string, OcelValue>
+            {
+                { "version", new OcelString("1.0") },
+                { "ordering", new OcelString("timestamp") }
+            },
+            new Dictionary<string, OcelEvent>
+            {
+                { "e1", new OcelEvent("Add to cart", DateTimeOffset.Now, new List<string> { "item1" }, new Dictionary<string, OcelValue>()) }
+            },
+            new Dictionary<string, OcelObject>
+            {
+                { "item1", new OcelObject("Item", new Dictionary<string, OcelValue>
+                    {
+                        { "Cheese", new OcelInteger(12) }
+
+                    })
+                }
+            });
+
+        private static (
+            ILiteCollection<Tuple<string, OcelEvent>> e, 
+            ILiteCollection<Tuple<string, OcelObject>> o, 
+            ILiteCollection<Tuple<string, OcelValue>> a) 
+            GetCollections(ILiteDatabase db)
         {
-            var log = new OcelLog(
-                new Dictionary<string, OcelValue>
-                {
-                    { "version", new OcelString("1.0") },
-                    { "ordering", new OcelString("timestamp") }
-                },
-                new Dictionary<string, OcelEvent>
-                {
-                    { "e1", new OcelEvent("Add to cart", DateTimeOffset.Now, new List<string> { "item1" }, new Dictionary<string, OcelValue>()) }
-                }, 
-                new Dictionary<string, OcelObject>
-                {
-                    { "item1", new OcelObject("Item", new Dictionary<string, OcelValue> 
-                        {
-                            { "Cheese", new OcelInteger(12) }
+            var events = db.GetCollection<Tuple<string, OcelEvent>>("events");
+            var objects = db.GetCollection<Tuple<string, OcelObject>>("objects");
+            var attrs = db.GetCollection<Tuple<string, OcelValue>>("global_attributes");
+            return (events, objects, attrs);
+        }
 
-                        })
-                    }
-                });
+        private static void TestCorrectNumberOfElements(ILiteDatabase db, OcelLog log)
+        {
+            var (e, o, a) = GetCollections(db);
+            Assert.True(e.Count() == log.Events.Count);
+            Assert.True(o.Count() == log.Objects.Count);
+            Assert.True(a.Count() == log.GlobalAttributes.Count);
+        }
 
+        [Fact]
+        public void CanDeserializeBasicLog()
+        {
             var db = new LiteDatabase(":memory:");
-            LiteDB.Serialize(db, log);
+            LiteDB.Serialize(db, Log);
+            TestCorrectNumberOfElements(db, Log);
+        }
+
+        [Fact]
+        public void CanSerializeAndDeserializeBasicLog()
+        {
+            var db = new LiteDatabase(":memory:");
+            LiteDB.Serialize(db, Log);
             var deserializedLog = LiteDB.Deserialize(db);
+            TestCorrectNumberOfElements(db, Log);
             Assert.True(deserializedLog.IsValid);
+        }
+
+        [Fact]
+        public void CanDeserializeBasicLogMultipleTimesWithoutError()
+        {
+            var db = new LiteDatabase(":memory:");
+            LiteDB.Serialize(db, Log);
+            LiteDB.Serialize(db, Log);
+            TestCorrectNumberOfElements(db, Log);
+        }
+
+        [Fact]
+        public void CanSerializeBasicLogToDisk()
+        {
+            var db = new LiteDatabase(":temp:");
+            LiteDB.Serialize(db, Log);
+            TestCorrectNumberOfElements(db, Log);
         }
     }
 }

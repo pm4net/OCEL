@@ -9,9 +9,19 @@ open Xunit.Abstractions
 
 type LiteDbTests(output: ITestOutputHelper) =
 
-    [<Fact>]
-    member _.``Can serialize and deserialize basic log in memory`` () =
-        let log = {
+    let getCollections (db: LiteDatabase) =
+        let eventsColl = db.GetCollection<string * OcelEvent>("events")
+        let objectsColl = db.GetCollection<string * OcelObject>("objects")
+        let globalAttrsColl = db.GetCollection<string * OcelValue>("global_attributes")
+        (eventsColl, objectsColl, globalAttrsColl)
+
+    let testCorrectNumberOfElements (db: LiteDatabase) (log: OcelLog) =
+        let (e, o, a) = getCollections db
+        e.Count() = log.Events.Count |> Assert.True
+        o.Count() = log.Objects.Count |> Assert.True
+        a.Count() = log.GlobalAttributes.Count |> Assert.True
+
+    let log = {
             GlobalAttributes = ["version", OcelString "1.0"; "ordering", OcelString "timestamp"] |> Map.ofSeq
             Events = 
                 ["e1", {
@@ -34,8 +44,30 @@ type LiteDbTests(output: ITestOutputHelper) =
                 |> Map.ofList
         }
 
+    [<Fact>]
+    member _.``Can serialize basic log`` () =
         let db = new LiteDatabase(":memory:")
         OCEL.LiteDB.serialize db log
+        testCorrectNumberOfElements db log
+
+    [<Fact>]
+    member _.``Can serialize and deserialize basic log`` () =
+        let db = new LiteDatabase(":memory:")
+        OCEL.LiteDB.serialize db log
+        testCorrectNumberOfElements db log
         let deserializedLog = OCEL.LiteDB.deserialize db
         deserializedLog.IsValid |> Assert.True
         log.Equals deserializedLog |> Assert.True
+
+    [<Fact>]
+    member _.``Can serialize basic log multiple times without error`` () =
+        let db = new LiteDatabase(":memory:")
+        OCEL.LiteDB.serialize db log
+        OCEL.LiteDB.serialize db log
+        testCorrectNumberOfElements db log
+
+    [<Fact>]
+    member _.``Can serialize basic log to disk`` () =
+        let db = new LiteDatabase(":temp:")
+        OCEL.LiteDB.serialize db log
+        testCorrectNumberOfElements db log
