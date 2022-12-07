@@ -11,45 +11,45 @@ open Xunit.Abstractions
 type XmlTests(output: ITestOutputHelper) =
 
     [<Fact>]
-    member __.``Sample XML is valid according to schema`` () =
+    member _.``Sample XML is valid according to schema`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         xml |> OcelXml.validate |> Assert.True
 
     [<Fact>]
-    member __.``"GitHub pm4py" XML is valid according to schema`` () =
+    member _.``"GitHub pm4py" XML is valid according to schema`` () =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
         xml |> OcelXml.validate |> Assert.True
 
     [<Fact>]
-    member __.``Can parse sample XML`` () =
+    member _.``Can parse sample XML`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         xml |> OcelXml.deserialize |> Assert.NotNull
 
     [<Fact>]
-    member __.``Parsed sample XML satisfies well-formedness property`` () =
+    member _.``Parsed sample XML satisfies well-formedness property`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         let parsed = OcelXml.deserialize xml
         parsed.IsValid |> Assert.True
 
     [<Fact>]
-    member __.``Can parse "GitHub pm4py" log`` () =
+    member _.``Can parse "GitHub pm4py" log`` () =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
         xml |> OcelXml.deserialize |> Assert.NotNull
 
     [<Fact>]
-    member __.``Parsed "GitHub pm4py" XML satisfies well-formedness property`` () =
+    member _.``Parsed "GitHub pm4py" XML satisfies well-formedness property`` () =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
         let parsed = OcelXml.deserialize xml
         parsed.IsValid |> Assert.True
 
     [<Fact>]
-    member __.``Can parse nested XML`` () =
+    member _.``Can parse nested XML`` () =
         let xml = File.ReadAllText("minimal_nested.xmlocel")
         let parsed = OcelXml.deserialize xml
         parsed.IsValid |> Assert.True
 
     [<Fact>]
-    member __.``Can serialize nested XML`` () =
+    member _.``Can serialize nested XML`` () =
         let xml = File.ReadAllText("minimal_nested.xmlocel")
         let parsed = OcelXml.deserialize xml
         let serialized = OcelXml.serialize Formatting.Indented parsed
@@ -57,7 +57,7 @@ type XmlTests(output: ITestOutputHelper) =
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
     [<Fact>]
-    member __.``Can serialize sample log`` () =
+    member _.``Can serialize sample log`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         let parsed = xml |> OcelXml.deserialize
         let serialized = parsed |> OcelXml.serialize Formatting.Indented
@@ -65,7 +65,7 @@ type XmlTests(output: ITestOutputHelper) =
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
     [<Fact>]
-    member __.``Can serialize "GitHub pm4pmy" log`` () =
+    member _.``Can serialize "GitHub pm4pmy" log`` () =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
         let parsed = xml |> OcelXml.deserialize
         let serialized = parsed |> OcelXml.serialize Formatting.Indented
@@ -73,7 +73,7 @@ type XmlTests(output: ITestOutputHelper) =
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
     [<Fact>]
-    member __.``Can serialize sample log and deserialize it again`` () =
+    member _.``Can serialize sample log and deserialize it again`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         let log = xml |> OcelXml.deserialize
         let logReserialized = log |> OcelXml.serialize Formatting.Indented |> OcelXml.deserialize

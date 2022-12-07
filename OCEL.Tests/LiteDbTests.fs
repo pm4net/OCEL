@@ -28,7 +28,18 @@ type LiteDbTests(output: ITestOutputHelper) =
                     Activity = "Add to cart"
                     Timestamp = DateTimeOffset.Now
                     OMap = ["item1"]
-                    VMap = ["price", OcelFloat 13.37; "added on", OcelTimestamp DateTimeOffset.Now] |> Map.ofList
+                    VMap = [
+                        "price", OcelFloat 13.37
+                        "added on", OcelTimestamp DateTimeOffset.Now
+                        "nested-list", OcelList [
+                            OcelFloat 12
+                            OcelBoolean true
+                            OcelMap ([
+                                "timestamp", DateTimeOffset.Now |> OcelTimestamp
+                                "amount", OcelFloat 2.5
+                            ] |> Map.ofSeq)
+                        ]
+                    ] |> Map.ofList
                 }; "e2", {
                     Activity = "Submit order"
                     Timestamp = DateTimeOffset.Now.AddMinutes 1
@@ -43,6 +54,12 @@ type LiteDbTests(output: ITestOutputHelper) =
                 }]
                 |> Map.ofList
         }
+
+    [<Fact>]
+    member _.``Can deserialize basic log`` () =
+        let db = new LiteDatabase("Filename=minimal.db;ReadOnly=true")
+        let log = OCEL.OcelLiteDB.deserialize db
+        log.IsValid |> Assert.True
 
     [<Fact>]
     member _.``Can serialize basic log`` () =

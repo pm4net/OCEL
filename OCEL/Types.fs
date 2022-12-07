@@ -10,6 +10,7 @@ type Formatting =
 
 // OCEL types
 
+[<CustomEquality; NoComparison>]
 type OcelValue =
     | OcelString of string
     | OcelTimestamp of DateTimeOffset
@@ -17,7 +18,23 @@ type OcelValue =
     | OcelFloat of double
     | OcelBoolean of bool
     | OcelList of OcelValue seq
-    | OcelMap of OcelAttributes
+    | OcelMap of OcelAttributes 
+    with
+    override this.Equals(other) =
+        match other with
+        | :? OcelValue as v ->
+            match this, v with
+            | OcelString s1, OcelString s2 -> s1 = s2
+            | OcelTimestamp t1, OcelTimestamp t2 -> t1 = t2
+            | OcelInteger i1, OcelInteger i2 -> i1 = i2
+            | OcelFloat f1, OcelFloat f2 -> f1 = f2
+            | OcelBoolean b1, OcelBoolean b2 -> b1 = b2
+            // Needs custom comparison of each item, because seq has reference equality
+            | OcelList l1, OcelList l2 -> (l1, l2) ||> Seq.forall2 (fun a b -> a = b)
+            | OcelMap m1, OcelMap m2 -> m1 = m2
+            | _ -> false
+        | _ -> false
+    override this.GetHashCode() = hash this
 
 and OcelAttributes = Map<string, OcelValue>
 
@@ -34,6 +51,7 @@ type OcelEvent = {
             this.Activity = e.Activity &&
             this.Timestamp = e.Timestamp &&
             this.VMap = e.VMap &&
+            // Needs custom comparison of each item, because seq has reference equality
             (this.OMap, e.OMap) ||> Seq.compareWith Operators.compare = 0
         | _ -> false
     override this.GetHashCode() = hash this
