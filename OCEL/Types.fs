@@ -16,8 +16,10 @@ type OcelValue =
     | OcelInteger of int64
     | OcelFloat of double
     | OcelBoolean of bool
+    | OcelList of OcelValue seq
+    | OcelMap of OcelAttributes
 
-type OcelAttributes = Map<string, OcelValue>
+and OcelAttributes = Map<string, OcelValue>
 
 [<CustomEquality; NoComparison>]
 type OcelEvent = {

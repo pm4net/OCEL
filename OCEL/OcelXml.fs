@@ -230,6 +230,7 @@ module OcelXml =
                 | OcelInteger i -> XElement "int", i.ToString(CultureInfo.InvariantCulture)
                 | OcelFloat f -> XElement "float", f.ToString(".0###############", CultureInfo.InvariantCulture)
                 | OcelBoolean b -> XElement "bool", b.ToString(CultureInfo.InvariantCulture)
+                | OcelList l -> XElement "list", l.ToString() // TODO
             xElem.SetAttributeValue("key", key)
             xElem.SetAttributeValue("value", strVal)
             xElem

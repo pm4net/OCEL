@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using OCEL.Types;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -58,6 +59,24 @@ namespace OCEL.CSharp.Tests
             var json = File.ReadAllText("github_pm4py.jsonocel");
             var parsed = OcelJson.Deserialize(json);
             Assert.True(parsed.IsValid);
+        }
+
+        [Fact]
+        public void CanParseNestedJson()
+        {
+            var json = File.ReadAllText("minimal_nested.jsonocel");
+            var parsed = OcelJson.Deserialize(json);
+            Assert.True(parsed.IsValid);
+        }
+
+        [Fact]
+        public void CanSerializeNestedJson()
+        {
+            var json = File.ReadAllText("minimal_nested.jsonocel");
+            var parsed = OcelJson.Deserialize(json);
+            var serialized = OcelJson.Serialize(parsed, Formatting.Indented);
+            _output.WriteLine($"Serialized JSON:{Environment.NewLine}{serialized}");
+            Assert.False(string.IsNullOrWhiteSpace(serialized));
         }
 
         [Fact]

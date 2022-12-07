@@ -32,13 +32,14 @@ module OcelJson =
         | None -> failwith $"Object \"{eventId}\" is either not defined or has no value for \"{propName}\""
 
     /// Extract the value from a token and cast it into one of the supported OCEL types, otherwise throw an error.
-    let private extractValueFromToken (token: JToken) =
+    let rec private extractValueFromToken (token: JToken) =
         match token.Type with
         | JTokenType.Integer -> OcelInteger(token.Value<int64>())
         | JTokenType.Float -> OcelFloat(token.Value<double>())
         | JTokenType.String -> OcelString(token.Value<string>())
         | JTokenType.Boolean -> OcelBoolean(token.Value<bool>())
         | JTokenType.Date -> OcelTimestamp(token.Value<DateTimeOffset>())
+        | JTokenType.Array -> OcelList(token.Value<seq<JToken>>() |> Seq.map extractValueFromToken)
         | _ -> failwith $"Type {token.Type} on attributes not supported."
 
     /// Extract a map of values from a list of properties
@@ -141,13 +142,14 @@ module OcelJson =
     /// <inheritdoc />
     let serialize (formatting: OCEL.Types.Formatting) (log: OcelLog) : string =
         /// Get the value from the DU and put it into a JToken. Using reflection as FromObject handles the correct typing
-        let createTokenFromOcelValue value =
+        let rec createTokenFromOcelValue value =
             match value with
             | OcelString s -> JToken.FromObject s
             | OcelTimestamp t -> JToken.FromObject t
             | OcelInteger i -> JToken.FromObject i
             | OcelFloat f -> JToken.FromObject f
             | OcelBoolean b -> JToken.FromObject b
+            | OcelList l -> JArray(l |> Seq.map (fun o -> createTokenFromOcelValue o))
 
         /// Construct the global log object
         let createGlobalLog log =

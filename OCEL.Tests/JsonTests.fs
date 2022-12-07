@@ -43,6 +43,19 @@ type JsonTests(output: ITestOutputHelper) =
         parsed.IsValid |> Assert.True
 
     [<Fact>]
+    member __.``Can parse nested JSON`` () =
+        let json = File.ReadAllText("minimal_nested.jsonocel")
+        let parsed = OcelJson.deserialize json
+        parsed.IsValid |> Assert.True
+
+    [<Fact>]
+    member __.``Can serialize nested JSON`` () =
+        let json = File.ReadAllText("minimal_nested.jsonocel")
+        let parsed = OcelJson.deserialize json
+        let serialized = OcelJson.serialize Formatting.Indented parsed
+        String.IsNullOrWhiteSpace serialized |> Assert.False
+
+    [<Fact>]
     member __.``Can serialize sample log`` () =
         let json = File.ReadAllText("minimal.jsonocel")
         let parsed = json |> OcelJson.deserialize

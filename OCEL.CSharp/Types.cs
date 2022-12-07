@@ -121,6 +121,8 @@ namespace OCEL.CSharp
                     return new OcelFloat(f.Item);
                 case Types.OcelValue.OcelBoolean b:
                     return new OcelBoolean(b.Item);
+                case Types.OcelValue.OcelList l:
+                    return new OcelList(l.Item.Select(x => (OcelValue) x));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(v));
             }
@@ -175,5 +177,15 @@ namespace OCEL.CSharp
         }
 
         public bool Value { get; set; }
+    }
+
+    public class OcelList : OcelValue
+    {
+        public OcelList(IEnumerable<OcelValue> values)
+        {
+            Values = values;
+        }
+
+        public IEnumerable<OcelValue> Values { get; set; }
     }
 }

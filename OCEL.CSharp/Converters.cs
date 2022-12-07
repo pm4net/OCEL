@@ -77,6 +77,8 @@ namespace OCEL.CSharp
                     return Types.OcelValue.NewOcelFloat(f.Value);
                 case OcelBoolean b:
                     return Types.OcelValue.NewOcelBoolean(b.Value);
+                case OcelList l:
+                    return Types.OcelValue.NewOcelList(l.Values.Select(x => x.FromCSharpOcelValue()));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(v));
             }
