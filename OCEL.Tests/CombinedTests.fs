@@ -12,7 +12,7 @@ open LiteDB
 type CombinedTests(output: ITestOutputHelper) =
 
     [<Fact>]
-    member __.``Can convert sample OCEL-JSON to OCEL-XML`` () =
+    member _.``Can convert sample OCEL-JSON to OCEL-XML`` () =
         let json = File.ReadAllText("minimal.jsonocel")
         let log = OcelJson.deserialize json
         let xml = OcelXml.serialize Formatting.Indented log
@@ -20,7 +20,15 @@ type CombinedTests(output: ITestOutputHelper) =
         OcelXml.validate xml |> Assert.True
 
     [<Fact>]
-    member __.``Can convert sample OCEL-XML to OCEL-JSON`` () =
+    member _.``Can convert sample nested OCEL-JSON to OCEL-XML`` () =
+        let json = File.ReadAllText("minimal_nested.jsonocel")
+        let log = OcelJson.deserialize json
+        let xml = OcelXml.serialize Formatting.Indented log
+        output.WriteLine $"Serialized XML:{Environment.NewLine}{xml}"
+        OcelXml.validate xml |> Assert.True
+
+    [<Fact>]
+    member _.``Can convert sample OCEL-XML to OCEL-JSON`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         let log = OcelXml.deserialize xml
         let json = OcelJson.serialize Formatting.Indented log
@@ -28,14 +36,22 @@ type CombinedTests(output: ITestOutputHelper) =
         OcelJson.validate json |> Assert.True
 
     [<Fact>]
-    member __.``Can convert sample OCEL-JSON to LiteDB`` () =
+    member _.``Can convert sample nested OCEL-XML to OCEL-JSON`` () =
+        let xml = File.ReadAllText("minimal_nested.xmlocel")
+        let log = OcelXml.deserialize xml
+        let json = OcelJson.serialize Formatting.Indented log
+        output.WriteLine $"Serialized JSON:{Environment.NewLine}{json}"
+        OcelJson.validate json |> Assert.True
+
+    [<Fact>]
+    member _.``Can convert sample OCEL-JSON to LiteDB`` () =
         let json = File.ReadAllText("minimal.jsonocel")
         let log = OcelJson.deserialize json
         let liteDb = new LiteDatabase(":memory:")
         OCEL.OcelLiteDB.serialize liteDb log
 
     [<Fact>]
-    member __.``Can convert sample OCEL-XML to LiteDB`` () =
+    member _.``Can convert sample OCEL-XML to LiteDB`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         let log = OcelXml.deserialize xml
         let liteDb = new LiteDatabase(":memory:")

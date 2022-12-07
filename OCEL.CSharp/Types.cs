@@ -36,7 +36,7 @@ namespace OCEL.CSharp
         /// </summary>
         public ISet<string> AttributeNames =>
             new HashSet<string>(
-                Events.SelectMany(e => e.Value.VMap.Keys).Union(
+                Events.SelectMany(e => ExtractKeysFromMapping(e.Value.VMap)).Union(
                     Objects.SelectMany(o => o.Value.OvMap.Keys)));
 
         /// <summary>
@@ -53,6 +53,24 @@ namespace OCEL.CSharp
         /// Indicates whether the log is valid according to the OCEL specification
         /// </summary>
         public bool IsValid => Events.All(e => e.Value.OMap.All(o => Objects.ContainsKey(o)));
+
+        private static IEnumerable<string> ExtractKeysFromValue(OcelValue value)
+        {
+            switch (value)
+            {
+                case OcelList l:
+                    return l.Values.SelectMany(ExtractKeysFromValue);
+                case OcelMap m:
+                    return ExtractKeysFromMapping(m.Values);
+                default:
+                    return new List<string>();
+            }
+        }
+
+        private static IEnumerable<string> ExtractKeysFromMapping(IDictionary<string, OcelValue> mapping)
+        {
+            return mapping.SelectMany(x => ExtractKeysFromValue(x.Value).Append(x.Key));
+        }
     }
 
     public class OcelEvent
@@ -121,6 +139,10 @@ namespace OCEL.CSharp
                     return new OcelFloat(f.Item);
                 case Types.OcelValue.OcelBoolean b:
                     return new OcelBoolean(b.Item);
+                case Types.OcelValue.OcelList l:
+                    return new OcelList(l.Item.Select(x => (OcelValue) x));
+                case Types.OcelValue.OcelMap m:
+                    return new OcelMap(m.Item.ToDictionary(x => x.Key, x => (OcelValue) x.Value));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(v));
             }
@@ -175,5 +197,25 @@ namespace OCEL.CSharp
         }
 
         public bool Value { get; set; }
+    }
+
+    public class OcelList : OcelValue
+    {
+        public OcelList(IEnumerable<OcelValue> values)
+        {
+            Values = values;
+        }
+
+        public IEnumerable<OcelValue> Values { get; set; }
+    }
+
+    public class OcelMap : OcelValue
+    {
+        public OcelMap(IDictionary<string, OcelValue> values)
+        {
+            Values = values;
+        }
+
+        public IDictionary<string, OcelValue> Values { get; set; }
     }
 }

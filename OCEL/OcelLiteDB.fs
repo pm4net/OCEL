@@ -21,8 +21,8 @@ module OcelLiteDB =
         )
 
         // Custom OcelValue handler to reduce size of stored data (otherwise excludes internal properties like IsOcelString, IsOcelTimestamp, ...)
-        BsonMapper.Global.RegisterType<OcelValue>(
-            fun value ->
+        let rec ocelValueSerializer =
+            (fun value ->
                 let doc = BsonDocument()
                 match value with
                 | OcelString s ->
@@ -40,17 +40,27 @@ module OcelLiteDB =
                 | OcelBoolean b -> 
                     doc["type"] <- nameof(OcelBoolean)
                     doc["val"] <- b
-                doc
-            ,
-            fun doc ->
+                | OcelList l ->
+                    doc["type"] <- nameof(OcelList)
+                    doc["val"] <- l |> Seq.map ocelValueSerializer |> BsonArray
+                | OcelMap m ->
+                    doc["type"] <- nameof(OcelMap)
+                    doc["val"] <- m |> Map.map (fun _ v -> ocelValueSerializer v) |> Map.toSeq |> dict |> BsonDocument
+                doc :> BsonValue)
+
+        let rec ocelValueDeserializer =
+            (fun (doc: BsonValue) ->
                 match doc["type"].AsString, doc["val"] with
                 | nameof(OcelString), v -> OcelString v.AsString
                 | nameof(OcelTimestamp), v -> BsonMapper.Global.Deserialize<DateTimeOffset> v |> OcelTimestamp
                 | nameof(OcelInteger), v -> OcelInteger v.AsInt64
                 | nameof(OcelFloat), v -> OcelFloat v.AsDouble
                 | nameof(OcelBoolean), v -> OcelBoolean v.AsBoolean
-                | _ -> raise (ArgumentOutOfRangeException "type")
-        )
+                | nameof(OcelList), v -> v.AsArray |> Seq.map ocelValueDeserializer |> OcelList
+                | nameof(OcelMap), v -> v.AsDocument |> Seq.map (fun kv -> kv.Key, ocelValueDeserializer kv.Value) |> Map.ofSeq |> OcelMap
+                | _ -> raise (ArgumentOutOfRangeException "type"))
+
+        BsonMapper.Global.RegisterType<OcelValue>(ocelValueSerializer, ocelValueDeserializer)
 
         // Custom OcelAttributes handler
         BsonMapper.Global.RegisterType<OcelAttributes>(

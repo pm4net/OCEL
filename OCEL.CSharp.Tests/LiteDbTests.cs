@@ -61,6 +61,14 @@ namespace OCEL.CSharp.Tests
         [Fact]
         public void CanDeserializeBasicLog()
         {
+            var db = new LiteDatabase("Filename=minimal.db;ReadOnly=true");
+            var log = OcelLiteDB.Deserialize(db);
+            Assert.True(log.IsValid);
+        }
+
+        [Fact]
+        public void CanSerializeBasicLog()
+        {
             var db = new LiteDatabase(":memory:");
             OcelLiteDB.Serialize(db, Log);
             TestCorrectNumberOfElements(db, Log);

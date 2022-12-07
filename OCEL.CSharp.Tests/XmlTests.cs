@@ -49,7 +49,7 @@ namespace OCEL.CSharp.Tests
         {
             var xml = File.ReadAllText("github_pm4py.xmlocel");
             var parsed = OcelXml.Deserialize(xml);
-            Assert.NotNull(parsed);
+            Assert.True(parsed.IsValid);
         }
 
         [Fact]
@@ -58,6 +58,24 @@ namespace OCEL.CSharp.Tests
             var xml = File.ReadAllText("github_pm4py.xmlocel");
             var parsed = OcelXml.Deserialize(xml);
             Assert.True(parsed.IsValid);
+        }
+
+        [Fact]
+        public void CanParseNestedXml()
+        {
+            var xml = File.ReadAllText("minimal_nested.xmlocel");
+            var parsed = OcelXml.Deserialize(xml);
+            Assert.True(parsed.IsValid);
+        }
+
+        [Fact]
+        public void CanSerializeNestedXml()
+        {
+            var xml = File.ReadAllText("minimal_nested.xmlocel");
+            var parsed = OcelXml.Deserialize(xml);
+            var serialized = OcelXml.Serialize(parsed, Types.Formatting.Indented);
+            _output.WriteLine($"Serialized XML:{Environment.NewLine}{serialized}");
+            Assert.False(string.IsNullOrWhiteSpace(serialized));
         }
 
         [Fact]
