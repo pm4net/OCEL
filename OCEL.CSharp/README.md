@@ -54,7 +54,7 @@ var fromXml = OCEL.CSharp.OcelXml.Deserialize(xml);
 
 ```csharp
 var log = OCEL.CSharp.OcelJson.Deserialize(File.ReadAllText("minimal.jsonocel"));
-var db = new LiteDatabase(":memory:);
+var db = new LiteDatabase(":memory:");
 OCEL.CSharp.OcelLiteDB.Serialize(db, log);
 var serializedLog = OCEL.CSharp.OcelLiteDB.Deserialize(db);
 ```
