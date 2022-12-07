@@ -18,17 +18,20 @@
 
   <ItemGroup>
     <Compile Include="Types.fs" />
-    <Compile Include="Json.fsi" />
-    <Compile Include="Json.fs" />
-    <Compile Include="Xml.fsi" />
-    <Compile Include="Xml.fs" />
-  </ItemGroup>
-	
-  <ItemGroup>
-	<None Include="README.md" Pack="true" PackagePath="\" />
+    <Compile Include="OcelJson.fsi" />
+    <Compile Include="OcelJson.fs" />
+    <Compile Include="OcelXml.fsi" />
+    <Compile Include="OcelXml.fs" />
+    <Compile Include="OcelLiteDB.fsi" />
+    <Compile Include="OcelLiteDB.fs" />
+    <None Include="README.md">
+      <Pack>true</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.14" />
   </ItemGroup>

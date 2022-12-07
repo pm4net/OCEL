@@ -2,7 +2,7 @@
 
 open OCEL.Types
 
-module Json =
+module OcelJson =
     /// Validate a JSON string against the OCEL JSON schema, with error messages.
     val validateWithErrorMessages : string -> bool * seq<string>
     /// Validate a JSON string against the OCEL JSON schema.

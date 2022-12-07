@@ -7,7 +7,7 @@ open System.Xml.Schema
 open System.Xml.Linq
 open OCEL.Types
 
-module Xml =
+module OcelXml =
 
     (* --- PRIVATE MEMBERS --- *)
 

@@ -7,14 +7,14 @@ using Newtonsoft.Json;
 
 namespace OCEL.CSharp
 {
-    public static class Json
+    public static class OcelJson
     {
         /// <summary>
         /// Validate a JSON string against the OCEL JSON schema, with error messages.
         /// </summary>
         public static Tuple<bool, IEnumerable<string>> ValidateWithErrorMessages(string json)
         {
-            return OCEL.Json.validateWithErrorMessages(json);
+            return OCEL.OcelJson.validateWithErrorMessages(json);
         }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static bool Validate(string json)
         {
-            return OCEL.Json.validate(json);
+            return OCEL.OcelJson.validate(json);
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static OcelLog Deserialize(string json)
         {
-            return OCEL.Json.deserialize(json).FromFSharpOcelLog();
+            return OCEL.OcelJson.deserialize(json).FromFSharpOcelLog();
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static string Serialize(OcelLog log, Types.Formatting formatting)
         {
-            return OCEL.Json.serialize(formatting, log.ToFSharpOcelLog());
+            return OCEL.OcelJson.serialize(formatting, log.ToFSharpOcelLog());
         }
     }
 }

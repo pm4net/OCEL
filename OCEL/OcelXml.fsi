@@ -2,7 +2,7 @@
 
 open OCEL.Types
 
-module Xml =
+module OcelXml =
     /// Validate a XML string against the OCEL XML schema, with error messages.
     val validateWithErrorMessages : string -> bool * seq<string>
     /// Validate a XML string against the OCEL XML schema.
