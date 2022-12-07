@@ -17,7 +17,7 @@ An additional useful format is to store OCEL data in document databases such as 
 | ------------- |:-------------:|
 | JSON          | Implemented   |
 | XML           | Implemented   |
-| LiteDB        | Planned       |
+| LiteDB        | Implemented   |
 | MongoDB       | TBD           |
 
 # Libraries
@@ -37,8 +37,8 @@ Both libraries are available on NuGet:
 
 ```csharp
 var json = File.ReadAllText("minimal.jsonocel");
-var valid = OCEL.CSharp.Json.Validate(json);
-var (valid, errors) = OCEL.CSharp.Xml.ValidateWithErrorMessages(xml);
+var valid = OCEL.CSharp.OcelJson.Validate(json);
+var (valid, errors) = OCEL.CSharp.OcelJson.ValidateWithErrorMessages(json);
 ```
 
 ## Parsing a JSON-OCEL and XML-OCEL string
@@ -46,16 +46,25 @@ var (valid, errors) = OCEL.CSharp.Xml.ValidateWithErrorMessages(xml);
 ```csharp
 var json = File.ReadAllText("minimal.jsonocel");
 var xml = File.ReadAllText("minimal.xmlocel");
-var fromJson = OCEL.CSharp.Json.Deserialize(json);
-var fromXml = OCEL.CSharp.Xml.Deserialize(xml);
+var fromJson = OCEL.CSharp.OcelJson.Deserialize(json);
+var fromXml = OCEL.CSharp.OcelXml.Deserialize(xml);
+```
+
+## Writing and reading from a LiteDB database
+
+```csharp
+var log = OCEL.CSharp.OcelJson.Deserialize(File.ReadAllText("minimal.jsonocel"));
+var db = new LiteDatabase(":memory:);
+OCEL.CSharp.OcelLiteDB.Serialize(db, log);
+var serializedLog = OCEL.CSharp.OcelLiteDB.Deserialize(db);
 ```
 
 ## Converting between formats
 
 ```csharp
 var json = File.ReadAllText("minimal.jsonocel");
-var parsed = OCEL.CSharp.Json.Deserialize(json);
-var xml = OCEL.CSharp.Xml.Serialize(parsed, OCEL.Types.Formatting.Indented);
+var parsed = OCEL.CSharp.OcelJson.Deserialize(json);
+var xml = OCEL.CSharp.OcelXml.Serialize(parsed, OCEL.Types.Formatting.Indented);
 ```
 
 # References
