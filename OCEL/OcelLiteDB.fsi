@@ -3,7 +3,7 @@ namespace OCEL
 open LiteDB
 open OCEL.Types
 
-module LiteDB =
+module OcelLiteDB =
     /// Validate a LiteDatabase in terms of its structure and content against the OCEL standard, with error messages.
     val validateWithErrorMessage : LiteDatabase -> bool * seq<string>
     /// Validate a LiteDatabase in terms of its structure and content against the OCEL standard.

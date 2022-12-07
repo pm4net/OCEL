@@ -4,7 +4,7 @@ open System
 open LiteDB
 open OCEL.Types
 
-module LiteDB =
+module OcelLiteDB =
     
     (* --- PRIVATE MEMBERS --- *)
 

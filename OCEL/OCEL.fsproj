@@ -18,12 +18,12 @@
 
   <ItemGroup>
     <Compile Include="Types.fs" />
-    <Compile Include="Json.fsi" />
-    <Compile Include="Json.fs" />
-    <Compile Include="Xml.fsi" />
-    <Compile Include="Xml.fs" />
-    <Compile Include="LiteDB.fsi" />
-    <Compile Include="LiteDB.fs" />
+    <Compile Include="OcelJson.fsi" />
+    <Compile Include="OcelJson.fs" />
+    <Compile Include="OcelXml.fsi" />
+    <Compile Include="OcelXml.fs" />
+    <Compile Include="OcelLiteDB.fsi" />
+    <Compile Include="OcelLiteDB.fs" />
     <None Include="README.md">
       <Pack>true</Pack>
       <PackagePath>\</PackagePath>

@@ -7,14 +7,15 @@ using LiteDB;
 
 namespace OCEL.CSharp
 {
-    public static class LiteDB
+    // ReSharper disable once InconsistentNaming
+    public static class OcelLiteDB
     {
         /// <summary>
         /// Validate a LiteDatabase in terms of its structure and content against the OCEL standard, with error messages.
         /// </summary>
         public static Tuple<bool, IEnumerable<string>> ValidateWithErrorMessages(LiteDatabase db)
         {
-            return OCEL.LiteDB.validateWithErrorMessage(db);
+            return OCEL.OcelLiteDB.validateWithErrorMessage(db);
         }
 
         /// <summary>
@@ -22,7 +23,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static bool Validate(LiteDatabase db)
         {
-            return OCEL.LiteDB.validate(db);
+            return OCEL.OcelLiteDB.validate(db);
         }
 
         /// <summary>
@@ -30,7 +31,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static OcelLog Deserialize(LiteDatabase db)
         {
-            return OCEL.LiteDB.deserialize(db).FromFSharpOcelLog();
+            return OCEL.OcelLiteDB.deserialize(db).FromFSharpOcelLog();
         }
 
         /// <summary>
@@ -38,7 +39,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static void Serialize(LiteDatabase db, OcelLog log)
         {
-            OCEL.LiteDB.serialize(db, log.ToFSharpOcelLog());
+            OCEL.OcelLiteDB.serialize(db, log.ToFSharpOcelLog());
         }
     }
 }

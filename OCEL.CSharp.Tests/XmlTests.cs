@@ -18,21 +18,21 @@ namespace OCEL.CSharp.Tests
         public void SampleXmlIsValidAccordingToSchema()
         {
             var xml = File.ReadAllText("minimal.xmlocel");
-            Assert.True(Xml.Validate(xml));
+            Assert.True(OcelXml.Validate(xml));
         }
 
         [Fact]
         public void GitHubPm4PyXmlIsValidAccordingToSchema()
         {
             var xml = File.ReadAllText("github_pm4py.xmlocel");
-            Assert.True(Xml.Validate(xml));
+            Assert.True(OcelXml.Validate(xml));
         }
 
         [Fact]
         public void CanParseSampleXml()
         {
             var xml = File.ReadAllText("minimal.xmlocel");
-            var parsed = Xml.Deserialize(xml);
+            var parsed = OcelXml.Deserialize(xml);
             Assert.NotNull(parsed);
         }
 
@@ -40,7 +40,7 @@ namespace OCEL.CSharp.Tests
         public void ParsedSampleXmlSatisfiedWellFormednessProperty()
         {
             var xml = File.ReadAllText("minimal.xmlocel");
-            var parsed = Xml.Deserialize(xml);
+            var parsed = OcelXml.Deserialize(xml);
             Assert.True(parsed.IsValid);
         }
 
@@ -48,7 +48,7 @@ namespace OCEL.CSharp.Tests
         public void CanParseGitHubPm4PyLog()
         {
             var xml = File.ReadAllText("github_pm4py.xmlocel");
-            var parsed = Xml.Deserialize(xml);
+            var parsed = OcelXml.Deserialize(xml);
             Assert.NotNull(parsed);
         }
 
@@ -56,7 +56,7 @@ namespace OCEL.CSharp.Tests
         public void ParsedGitHubPm4PyXmlSatisfiedWellFormednessProperty()
         {
             var xml = File.ReadAllText("github_pm4py.xmlocel");
-            var parsed = Xml.Deserialize(xml);
+            var parsed = OcelXml.Deserialize(xml);
             Assert.True(parsed.IsValid);
         }
 
@@ -64,8 +64,8 @@ namespace OCEL.CSharp.Tests
         public void CanSerializeSampleLog()
         {
             var xml = File.ReadAllText("minimal.xmlocel");
-            var parsed = Xml.Deserialize(xml);
-            var serialized = Xml.Serialize(parsed, Types.Formatting.Indented);
+            var parsed = OcelXml.Deserialize(xml);
+            var serialized = OcelXml.Serialize(parsed, Types.Formatting.Indented);
             _output.WriteLine($"Serialized XML:{Environment.NewLine}{serialized}");
             Assert.False(string.IsNullOrWhiteSpace(serialized));
         }
@@ -74,8 +74,8 @@ namespace OCEL.CSharp.Tests
         public void CanSerializeGitHubPm4PyLog()
         {
             var xml = File.ReadAllText("github_pm4py.xmlocel");
-            var parsed = Xml.Deserialize(xml);
-            var serialized = Xml.Serialize(parsed, Types.Formatting.Indented);
+            var parsed = OcelXml.Deserialize(xml);
+            var serialized = OcelXml.Serialize(parsed, Types.Formatting.Indented);
             _output.WriteLine($"Serialized XML:{Environment.NewLine}{serialized}");
             Assert.False(string.IsNullOrWhiteSpace(serialized));
         }
@@ -84,9 +84,9 @@ namespace OCEL.CSharp.Tests
         public void CanSerializeSampleLogAndDeserializeItAgain()
         {
             var xml = File.ReadAllText("minimal.xmlocel");
-            var parsed = Xml.Deserialize(xml);
-            var serialized = Xml.Serialize(parsed, Types.Formatting.Indented);
-            var reSerialized = Xml.Deserialize(serialized);
+            var parsed = OcelXml.Deserialize(xml);
+            var serialized = OcelXml.Serialize(parsed, Types.Formatting.Indented);
+            var reSerialized = OcelXml.Deserialize(serialized);
             Assert.True(reSerialized.IsValid);
         }
     }

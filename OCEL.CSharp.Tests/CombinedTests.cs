@@ -20,9 +20,9 @@ namespace OCEL.CSharp.Tests
         public void CanConvertSampleOcelJsonToOcelXml()
         {
             var json = File.ReadAllText("minimal.jsonocel");
-            var log = Json.Deserialize(json);
-            var xml = Xml.Serialize(log, Formatting.Indented);
-            var valid = Xml.Validate(xml);
+            var log = OcelJson.Deserialize(json);
+            var xml = OcelXml.Serialize(log, Formatting.Indented);
+            var valid = OcelXml.Validate(xml);
             _output.WriteLine($"Serialized XML:{Environment.NewLine}{xml}");
             Assert.True(valid);
         }
@@ -31,9 +31,9 @@ namespace OCEL.CSharp.Tests
         public void CanConvertSampleXmlJsonToOcelJson()
         {
             var xml = File.ReadAllText("minimal.xmlocel");
-            var log = Xml.Deserialize(xml);
-            var json = Json.Serialize(log, Formatting.Indented);
-            var valid = Json.Validate(json);
+            var log = OcelXml.Deserialize(xml);
+            var json = OcelJson.Serialize(log, Formatting.Indented);
+            var valid = OcelJson.Validate(json);
             _output.WriteLine($"Serialized JSON:{Environment.NewLine}{json}");
             Assert.True(valid);
         }
@@ -42,18 +42,18 @@ namespace OCEL.CSharp.Tests
         public void CanConvertSampleOcelJsonToLiteDb()
         {
             var json = File.ReadAllText("minimal.jsonocel");
-            var log = Json.Deserialize(json);
+            var log = OcelJson.Deserialize(json);
             var liteDb = new LiteDatabase(":memory:");
-            LiteDB.Serialize(liteDb, log);
+            OcelLiteDB.Serialize(liteDb, log);
         }
 
         [Fact]
         public void CanConvertSampleOcelXmlToLiteDb()
         {
             var xml = File.ReadAllText("minimal.xmlocel");
-            var log = Xml.Deserialize(xml);
+            var log = OcelXml.Deserialize(xml);
             var liteDb = new LiteDatabase(":memory:");
-            LiteDB.Serialize(liteDb, log);
+            OcelLiteDB.Serialize(liteDb, log);
         }
     }
 }

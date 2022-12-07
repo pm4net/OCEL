@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace OCEL.CSharp
 {
-    public static class Xml
+    public static class OcelXml
     {
         /// <summary>
         /// Validate a XML string against the OCEL XML schema, with error messages.
         /// </summary>
         public static Tuple<bool, IEnumerable<string>> ValidateWithErrorMessages(string xml)
         {
-            return OCEL.Xml.validateWithErrorMessages(xml);
+            return OCEL.OcelXml.validateWithErrorMessages(xml);
         }
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static bool Validate(string xml)
         {
-            return OCEL.Xml.validate(xml);
+            return OCEL.OcelXml.validate(xml);
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static OcelLog Deserialize(string xml)
         {
-            return OCEL.Xml.deserialize(xml).FromFSharpOcelLog();
+            return OCEL.OcelXml.deserialize(xml).FromFSharpOcelLog();
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace OCEL.CSharp
         /// </summary>
         public static string Serialize(OcelLog log, Types.Formatting formatting)
         {
-            return OCEL.Xml.serialize(formatting, log.ToFSharpOcelLog());
+            return OCEL.OcelXml.serialize(formatting, log.ToFSharpOcelLog());
         }
     }
 }

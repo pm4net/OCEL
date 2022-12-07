@@ -62,7 +62,7 @@ namespace OCEL.CSharp.Tests
         public void CanDeserializeBasicLog()
         {
             var db = new LiteDatabase(":memory:");
-            LiteDB.Serialize(db, Log);
+            OcelLiteDB.Serialize(db, Log);
             TestCorrectNumberOfElements(db, Log);
         }
 
@@ -70,8 +70,8 @@ namespace OCEL.CSharp.Tests
         public void CanSerializeAndDeserializeBasicLog()
         {
             var db = new LiteDatabase(":memory:");
-            LiteDB.Serialize(db, Log);
-            var deserializedLog = LiteDB.Deserialize(db);
+            OcelLiteDB.Serialize(db, Log);
+            var deserializedLog = OcelLiteDB.Deserialize(db);
             TestCorrectNumberOfElements(db, Log);
             Assert.True(deserializedLog.IsValid);
         }
@@ -80,8 +80,8 @@ namespace OCEL.CSharp.Tests
         public void CanDeserializeBasicLogMultipleTimesWithoutError()
         {
             var db = new LiteDatabase(":memory:");
-            LiteDB.Serialize(db, Log);
-            LiteDB.Serialize(db, Log);
+            OcelLiteDB.Serialize(db, Log);
+            OcelLiteDB.Serialize(db, Log);
             TestCorrectNumberOfElements(db, Log);
         }
 
@@ -89,7 +89,7 @@ namespace OCEL.CSharp.Tests
         public void CanSerializeBasicLogToDisk()
         {
             var db = new LiteDatabase(":temp:");
-            LiteDB.Serialize(db, Log);
+            OcelLiteDB.Serialize(db, Log);
             TestCorrectNumberOfElements(db, Log);
         }
     }

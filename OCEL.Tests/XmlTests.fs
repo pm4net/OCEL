@@ -13,54 +13,54 @@ type XmlTests(output: ITestOutputHelper) =
     [<Fact>]
     member __.``Sample XML is valid according to schema`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
-        xml |> Xml.validate |> Assert.True
+        xml |> OcelXml.validate |> Assert.True
 
     [<Fact>]
     member __.``"GitHub pm4py" XML is valid according to schema`` () =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
-        xml |> Xml.validate |> Assert.True
+        xml |> OcelXml.validate |> Assert.True
 
     [<Fact>]
     member __.``Can parse sample XML`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
-        xml |> Xml.deserialize |> Assert.NotNull
+        xml |> OcelXml.deserialize |> Assert.NotNull
 
     [<Fact>]
     member __.``Parsed sample XML satisfies well-formedness property`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
-        let parsed = Xml.deserialize xml
+        let parsed = OcelXml.deserialize xml
         parsed.IsValid |> Assert.True
 
     [<Fact>]
     member __.``Can parse "GitHub pm4py" log`` () =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
-        xml |> Xml.deserialize |> Assert.NotNull
+        xml |> OcelXml.deserialize |> Assert.NotNull
 
     [<Fact>]
     member __.``Parsed "GitHub pm4py" XML satisfies well-formedness property`` () =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
-        let parsed = Xml.deserialize xml
+        let parsed = OcelXml.deserialize xml
         parsed.IsValid |> Assert.True
 
     [<Fact>]
     member __.``Can serialize sample log`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
-        let parsed = xml |> Xml.deserialize
-        let serialized = parsed |> Xml.serialize Formatting.Indented
+        let parsed = xml |> OcelXml.deserialize
+        let serialized = parsed |> OcelXml.serialize Formatting.Indented
         output.WriteLine $"Serialized XML:{Environment.NewLine}{serialized}"
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
     [<Fact>]
     member __.``Can serialize "GitHub pm4pmy" log`` () =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
-        let parsed = xml |> Xml.deserialize
-        let serialized = parsed |> Xml.serialize Formatting.Indented
+        let parsed = xml |> OcelXml.deserialize
+        let serialized = parsed |> OcelXml.serialize Formatting.Indented
         output.WriteLine $"Serialized XML:{Environment.NewLine}{serialized}"
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
     [<Fact>]
     member __.``Can serialize sample log and deserialize it again`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
-        let log = xml |> Xml.deserialize
-        let logReserialized = log |> Xml.serialize Formatting.Indented |> Xml.deserialize
+        let log = xml |> OcelXml.deserialize
+        let logReserialized = log |> OcelXml.serialize Formatting.Indented |> OcelXml.deserialize
         log = logReserialized |> Assert.True

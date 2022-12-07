@@ -8,7 +8,7 @@ open Newtonsoft.Json
 open Newtonsoft.Json.Schema
 open Newtonsoft.Json.Linq
 
-module Json =
+module OcelJson =
 
     (* --- PRIVATE MEMBERS --- *)
 
