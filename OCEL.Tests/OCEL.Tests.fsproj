@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 	<TargetFrameworks>net6.0</TargetFrameworks>
@@ -40,6 +40,9 @@
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</Content>
 	<Content Include="..\Samples\minimal.xmlocel">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+	<Content Include="..\Samples\minimal_nested.xmlocel">
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</Content>
     <Content Include="..\Samples\minimal.db">

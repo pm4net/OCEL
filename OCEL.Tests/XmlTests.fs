@@ -43,6 +43,20 @@ type XmlTests(output: ITestOutputHelper) =
         parsed.IsValid |> Assert.True
 
     [<Fact>]
+    member __.``Can parse nested XML`` () =
+        let xml = File.ReadAllText("minimal_nested.xmlocel")
+        let parsed = OcelXml.deserialize xml
+        parsed.IsValid |> Assert.True
+
+    [<Fact>]
+    member __.``Can serialize nested XML`` () =
+        let xml = File.ReadAllText("minimal_nested.xmlocel")
+        let parsed = OcelXml.deserialize xml
+        let serialized = OcelXml.serialize Formatting.Indented parsed
+        output.WriteLine $"Serialized XML:{Environment.NewLine}{serialized}"
+        String.IsNullOrWhiteSpace serialized |> Assert.False
+
+    [<Fact>]
     member __.``Can serialize sample log`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         let parsed = xml |> OcelXml.deserialize

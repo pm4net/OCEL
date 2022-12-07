@@ -20,8 +20,24 @@ type CombinedTests(output: ITestOutputHelper) =
         OcelXml.validate xml |> Assert.True
 
     [<Fact>]
+    member __.``Can convert sample nested OCEL-JSON to OCEL-XML`` () =
+        let json = File.ReadAllText("minimal_nested.jsonocel")
+        let log = OcelJson.deserialize json
+        let xml = OcelXml.serialize Formatting.Indented log
+        output.WriteLine $"Serialized XML:{Environment.NewLine}{xml}"
+        OcelXml.validate xml |> Assert.True
+
+    [<Fact>]
     member __.``Can convert sample OCEL-XML to OCEL-JSON`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
+        let log = OcelXml.deserialize xml
+        let json = OcelJson.serialize Formatting.Indented log
+        output.WriteLine $"Serialized JSON:{Environment.NewLine}{json}"
+        OcelJson.validate json |> Assert.True
+
+    [<Fact>]
+    member __.``Can convert sample nesetd OCEL-XML to OCEL-JSON`` () =
+        let xml = File.ReadAllText("minimal_nested.xmlocel")
         let log = OcelXml.deserialize xml
         let json = OcelJson.serialize Formatting.Indented log
         output.WriteLine $"Serialized JSON:{Environment.NewLine}{json}"

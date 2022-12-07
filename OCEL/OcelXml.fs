@@ -80,7 +80,7 @@ module OcelXml =
         | "Date" | "date" -> tryParseOrFallback tryParseDateTimeOffset xAttr
         | "Float" | "float" -> tryParseOrFallback tryParseDouble xAttr
         | "Int" | "int" -> tryParseOrFallback tryParseInt xAttr
-        | "Bool" | "bool" -> tryParseOrFallback tryParseBool xAttr
+        | "Boolean" | "boolean" -> tryParseOrFallback tryParseBool xAttr
         | _ -> guessValueFromAttribute xAttr
 
     /// Extract a sequence of value from a list with a given name inside the given element, using some extractor function on 
@@ -91,12 +91,21 @@ module OcelXml =
             l.Elements()
             |> Seq.map extractor
 
-    /// Extractor function that extracts the ID from the key attribute and the value from the Value attribute
-    let tupleExtractor (xElem: XElement) = 
+    /// Extractor function that extracts the ID from the key attribute and the value from the Value attribute. Supports nested lists.
+    let rec valueExtractor (xElem: XElement) = 
         match (xElem.Attribute "key" |> Option.ofObj, xElem.Attribute "value" |> Option.ofObj) with
         | Some k, Some v -> k.Value, extractValueFromAttribute xElem v
         | None, Some _ -> failwith $"No \"key\" attribute defined for element: {xElem}"
-        | Some _, None -> failwith $"No \"value\" attribute defined for element: {xElem}"
+        | Some k, None ->
+            match xElem.Name.LocalName with
+            | "List" | "list" ->
+                let elems = extractArray xElem.Parent k.Value valueExtractor
+                // Both lists and map's use the <list> property. If it is a list, all keys should have the same value.
+                if elems |> Seq.distinctBy fst |> Seq.length = 1 then
+                    k.Value, elems |> Seq.map snd |> OcelList
+                else
+                    k.Value, elems |> Map.ofSeq |> OcelMap
+            | _ -> failwith $"No \"value\" attribute defined for element: {xElem}"
         | _ -> failwith $"No \"key\" and \"value\" attribute defined for element: {xElem}"
 
     /// Get the key attribute of an element where the value of the key matches the input
@@ -152,7 +161,7 @@ module OcelXml =
                 match elem.Attribute "value" |> Option.ofObj with
                 | Some v -> v.Value
                 | None -> failwith $"No \"value\" attribute defined for element: {elem}")
-            VMap = extractArray event "vmap" tupleExtractor |> Map.ofSeq
+            VMap = extractArray event "vmap" valueExtractor |> Map.ofSeq
         }
         extractFromObject log "events" extractor
 
@@ -160,7 +169,7 @@ module OcelXml =
     let private extractObjects (log: XElement) =
         let extractor (event: XElement) = {
             Type = extractStringValueOfElementWithKey "type" event
-            OvMap = extractArray event "ovmap" tupleExtractor |> Map.ofSeq
+            OvMap = extractArray event "ovmap" valueExtractor |> Map.ofSeq
         }
         extractFromObject log "objects" extractor
 
@@ -194,7 +203,7 @@ module OcelXml =
     let deserialize (xml: string) =
         let xDoc = XDocument.Parse xml
         match xDoc.Elements() |> Seq.tryFind (fun e -> e.Name.LocalName = "log") with
-        | None -> failwith ""
+        | None -> failwith "No root element <log> defined."
         | Some xElm ->
             match xDoc |> validateXDocumentWithErrorMessages with
             | false, errors -> failwith $"""XML not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat Environment.NewLine}."""
@@ -222,18 +231,23 @@ module OcelXml =
             xElem
 
         /// Create an XElement from an OCEL value and a key
-        let createXElementFromKeyOcelValue key value =
-            let xElem, strVal =
+        let rec createXElementFromKeyOcelValue key value =
+            let createXElem (elemType: string) key (value: obj) =
+                let xElem = XElement elemType
+                xElem.SetAttributeValue("key", key)
                 match value with
-                | OcelString s -> XElement "string", s
-                | OcelTimestamp t -> XElement "date", t.ToString("O", CultureInfo.InvariantCulture) // ISO-8601 format identifier
-                | OcelInteger i -> XElement "int", i.ToString(CultureInfo.InvariantCulture)
-                | OcelFloat f -> XElement "float", f.ToString(".0###############", CultureInfo.InvariantCulture)
-                | OcelBoolean b -> XElement "bool", b.ToString(CultureInfo.InvariantCulture)
-                | OcelList l -> XElement "list", l.ToString() // TODO
-            xElem.SetAttributeValue("key", key)
-            xElem.SetAttributeValue("value", strVal)
-            xElem
+                | :? seq<obj> as objs -> objs |> Seq.iter (fun o -> xElem.Add o)
+                | _ -> xElem.SetAttributeValue("value", value)
+                xElem
+            
+            match value with
+            | OcelString s -> createXElem "string" key s
+            | OcelTimestamp t -> createXElem "date" key (t.ToString("O", CultureInfo.InvariantCulture)) // ISO-8601 format identifier
+            | OcelInteger i -> createXElem "int" key (i.ToString(CultureInfo.InvariantCulture))
+            | OcelFloat f -> createXElem "float" key (f.ToString(".0###############", CultureInfo.InvariantCulture))
+            | OcelBoolean b -> createXElem "boolean" key (b.ToString(CultureInfo.InvariantCulture).ToLower())
+            | OcelList l -> createXElem "list" key (l |> Seq.map (fun v -> createXElementFromKeyOcelValue "list-item" v))
+            | OcelMap m -> createXElem "list" key (m |> Seq.map (fun kv -> createXElementFromKeyOcelValue kv.Key kv.Value))
 
         /// Create a list of string of elements, given the key for the list and the key for each list item
         let createXElementList listKey itemKey items =
