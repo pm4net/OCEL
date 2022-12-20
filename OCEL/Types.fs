@@ -122,3 +122,22 @@ type OcelLog with
                     |> Seq.forall (fun o -> this.Objects.TryFind o <> None))
 
         doAllObjectsReferencedInEventsExist
+
+    /// Merge a log with another log. Duplicate keys are overwritten by the other log.
+    member this.MergeWith other =
+        let mergeMaps a b =
+            (a, b) ||> Map.fold (fun acc key value -> Map.add key value acc)
+
+        { this with
+            GlobalAttributes = (this.GlobalAttributes, other.GlobalAttributes) ||> mergeMaps
+            Events = (this.Events, other.Events) ||> mergeMaps
+            Objects = (this.Objects, other.Objects) ||> mergeMaps
+        }
+
+    /// An empty log
+    static member Empty =
+        {
+            GlobalAttributes = Map.empty
+            Events = Map.empty
+            Objects = Map.empty
+        }

@@ -9,8 +9,8 @@ namespace OCEL.CSharp
     public class OcelLog
     {
         public OcelLog(
-            IDictionary<string, OcelValue> globalAttributes, 
-            IDictionary<string, OcelEvent> events, 
+            Dictionary<string, OcelValue> globalAttributes, 
+            Dictionary<string, OcelEvent> events, 
             IDictionary<string, OcelObject> objects)
         {
             GlobalAttributes = globalAttributes;
@@ -53,6 +53,28 @@ namespace OCEL.CSharp
         /// Indicates whether the log is valid according to the OCEL specification
         /// </summary>
         public bool IsValid => Events.All(e => e.Value.OMap.All(o => Objects.ContainsKey(o)));
+
+        /// <summary>
+        /// An empty log
+        /// </summary>
+        public static OcelLog Empty => new OcelLog(new Dictionary<string, OcelValue>(), new Dictionary<string, OcelEvent>(), new Dictionary<string, OcelObject>());
+
+        /// <summary>
+        /// Merge a log with another log. Duplicate keys are overwritten by the other log.
+        /// </summary>
+        public OcelLog MergeWith(OcelLog other)
+        {
+            return new OcelLog(
+                this.GlobalAttributes
+                    .Concat(other.GlobalAttributes.Where(x => !this.GlobalAttributes.Keys.Contains(x.Key)))
+                    .ToDictionary(x => x.Key, x => x.Value),
+                this.Events
+                    .Concat(other.Events.Where(x => !this.Events.Keys.Contains(x.Key)))
+                    .ToDictionary(x => x.Key, x => x.Value),
+                this.Objects
+                    .Concat(other.Objects.Where(x => !this.Objects.Keys.Contains(x.Key)))                                         
+                    .ToDictionary(x => x.Key, x => x.Value));
+        }
 
         private static IEnumerable<string> ExtractKeysFromValue(OcelValue value)
         {
