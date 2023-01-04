@@ -5,14 +5,14 @@ using Microsoft.FSharp.Collections;
 
 namespace OCEL.CSharp
 {
-    internal static class FSharpConverters
+    public static class FSharpConverters
     {
         /// <summary>
         /// Create C# instance of an OCEL log from an F# OCEL log
         /// </summary>
         /// <param name="log">The F# OCEL log</param>
         /// <returns>A C# OCEL log</returns>
-        internal static OcelLog FromFSharpOcelLog(this Types.OcelLog log)
+        public static OcelLog FromFSharpOcelLog(this Types.OcelLog log)
         {
             return new OcelLog(log);
         }
@@ -22,7 +22,7 @@ namespace OCEL.CSharp
         /// </summary>
         /// <param name="log">The C# OCEL log</param>
         /// <returns>A F# OCEL log</returns>
-        internal static Types.OcelLog ToFSharpOcelLog(this OcelLog log)
+        public static Types.OcelLog ToFSharpOcelLog(this OcelLog log)
         {
             return new Types.OcelLog(
                 globalAttributes: log.GlobalAttributes.ToFSharpMap(),
@@ -47,7 +47,7 @@ namespace OCEL.CSharp
         /// </summary>
         private static FSharpMap<TKey, TValue> ToFSharpMap<TKey, TValue>(this IDictionary<TKey, TValue> dict)
         {
-            return new FSharpMap<TKey, TValue>(dict.Select(x => new Tuple<TKey, TValue>(x.Key, x.Value)));
+            return new FSharpMap<TKey, TValue>(dict.Where(x => x.Value != null).Select(x => new Tuple<TKey, TValue>(x.Key, x.Value)));
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace OCEL.CSharp
         /// <returns></returns>
         private static FSharpMap<string, Types.OcelValue> ToFSharpMap(this IDictionary<string, OcelValue> dict)
         {
-            return dict.ToDictionary(x => x.Key, x => x.Value.FromCSharpOcelValue()).ToFSharpMap();
+            return dict.Where(x => x.Value != null).ToDictionary(x => x.Key, x => x.Value.FromCSharpOcelValue()).ToFSharpMap();
         }
 
         /// <summary>
