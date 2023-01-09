@@ -10,51 +10,23 @@ type Formatting =
 
 // OCEL types
 
-[<CustomEquality; NoComparison>]
 type OcelValue =
     | OcelString of string
     | OcelTimestamp of DateTimeOffset
     | OcelInteger of int64
     | OcelFloat of double
     | OcelBoolean of bool
-    | OcelList of OcelValue seq
+    | OcelList of OcelValue list
     | OcelMap of OcelAttributes 
-    with
-    override this.Equals(other) =
-        match other with
-        | :? OcelValue as v ->
-            match this, v with
-            | OcelString s1, OcelString s2 -> s1 = s2
-            | OcelTimestamp t1, OcelTimestamp t2 -> t1 = t2
-            | OcelInteger i1, OcelInteger i2 -> i1 = i2
-            | OcelFloat f1, OcelFloat f2 -> f1 = f2
-            | OcelBoolean b1, OcelBoolean b2 -> b1 = b2
-            // Needs custom comparison of each item, because seq has reference equality
-            | OcelList l1, OcelList l2 -> (l1, l2) ||> Seq.forall2 (fun a b -> a = b)
-            | OcelMap m1, OcelMap m2 -> m1 = m2
-            | _ -> false
-        | _ -> false
-    override this.GetHashCode() = hash this
 
 and OcelAttributes = Map<string, OcelValue>
 
-[<CustomEquality; NoComparison>]
 type OcelEvent = {
     Activity: string
     Timestamp: DateTimeOffset
-    OMap: string seq
+    OMap: string list
     VMap: OcelAttributes
-} with
-    override this.Equals(other) =
-        match other with
-        | :? OcelEvent as e ->
-            this.Activity = e.Activity &&
-            this.Timestamp = e.Timestamp &&
-            this.VMap = e.VMap &&
-            // Needs custom comparison of each item, because seq has reference equality
-            (this.OMap, e.OMap) ||> Seq.compareWith Operators.compare = 0
-        | _ -> false
-    override this.GetHashCode() = hash this
+}
 
 type OcelObject = {
     Type: string
@@ -74,7 +46,7 @@ type OcelLog with
     member this.AttributeNames =
         let rec extractKeysFromValue v =
             match v with
-            | OcelList l -> l |> Seq.collect extractKeysFromValue |> Seq.toList
+            | OcelList l -> l |> List.collect extractKeysFromValue
             | OcelMap m -> m |> extractKeysFromMapping
             | _ -> []
 
@@ -86,40 +58,38 @@ type OcelLog with
 
         let eventAttributes =
             this.Events
-            |> Map.toSeq
-            |> Seq.map (fun (_, v) -> v.VMap |> extractKeysFromMapping)
-            |> Seq.concat
+            |> Map.toList
+            |> List.map (fun (_, v) -> v.VMap |> extractKeysFromMapping)
+            |> List.concat
 
         let objectAttributes =
             this.Objects
-            |> Map.toSeq
-            |> Seq.map (fun (_, v) -> v.OvMap |> extractKeysFromMapping)
-            |> Seq.concat
+            |> Map.toList
+            |> List.map (fun (_, v) -> v.OvMap |> extractKeysFromMapping)
+            |> List.concat
         
-        Set.ofSeq eventAttributes + Set.ofSeq objectAttributes
+        Set.ofList eventAttributes + Set.ofList objectAttributes
 
     /// The set of all object types in the log
     member this.ObjectTypes =
         this.Objects
-        |> Map.toSeq
-        |> Seq.map (fun (_, v) -> v.Type)
-        |> Set.ofSeq
+        |> Map.toList
+        |> List.map (fun (_, v) -> v.Type)
+        |> Set.ofList
 
     /// The list of events and their ID's, ordered by their timestamp
     member this.OrderedEvents =
         this.Events
-        |> Map.toSeq
-        |> Seq.sortBy (fun (_, v) -> v.Timestamp)
+        |> Map.toList
+        |> List.sortBy (fun (_, v) -> v.Timestamp)
 
     /// Indicates whether the log is valid according to the OCEL specification
     member this.IsValid =
         /// Objects that are referenced by events must exist
         let doAllObjectsReferencedInEventsExist =
             this.Events
-            |> Seq.forall 
-                (fun e -> 
-                    e.Value.OMap
-                    |> Seq.forall (fun o -> this.Objects.TryFind o <> None))
+            |> Map.toList
+            |> List.forall (fun (k, v) -> v.OMap |> List.forall (fun o -> this.Objects.TryFind o <> None))
 
         doAllObjectsReferencedInEventsExist
 

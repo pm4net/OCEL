@@ -56,7 +56,7 @@ module OcelLiteDB =
                 | nameof(OcelInteger), v -> OcelInteger v.AsInt64
                 | nameof(OcelFloat), v -> OcelFloat v.AsDouble
                 | nameof(OcelBoolean), v -> OcelBoolean v.AsBoolean
-                | nameof(OcelList), v -> v.AsArray |> Seq.map ocelValueDeserializer |> OcelList
+                | nameof(OcelList), v -> v.AsArray |> Seq.map ocelValueDeserializer |> List.ofSeq |> OcelList
                 | nameof(OcelMap), v -> v.AsDocument |> Seq.map (fun kv -> kv.Key, ocelValueDeserializer kv.Value) |> Map.ofSeq |> OcelMap
                 | _ -> raise (ArgumentOutOfRangeException "type"))
 
@@ -92,7 +92,7 @@ module OcelLiteDB =
             fun doc -> doc["_id"].AsString, { 
                 Activity = doc["activity"].AsString
                 Timestamp = BsonMapper.Global.Deserialize<DateTimeOffset> doc["timestamp"]
-                OMap = doc["omap"].AsArray |> Seq.map (fun o -> o.AsString)
+                OMap = doc["omap"].AsArray |> Seq.map (fun o -> o.AsString) |> List.ofSeq
                 VMap = BsonMapper.Global.Deserialize<OcelAttributes> doc["vmap"]
             })
 

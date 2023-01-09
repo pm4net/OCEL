@@ -102,7 +102,7 @@ module OcelXml =
                 let elems = extractArray xElem.Parent k.Value valueExtractor
                 // Both lists and map's use the <list> property. If it is a list, all keys should have the same value.
                 if elems |> Seq.distinctBy fst |> Seq.length = 1 then
-                    k.Value, elems |> Seq.map snd |> OcelList
+                    k.Value, elems |> Seq.map snd |> List.ofSeq |> OcelList
                 else
                     k.Value, elems |> Map.ofSeq |> OcelMap
             | _ -> failwith $"No \"value\" attribute defined for element: {xElem}"
@@ -160,7 +160,7 @@ module OcelXml =
             OMap = extractArray event "omap" (fun elem -> 
                 match elem.Attribute "value" |> Option.ofObj with
                 | Some v -> v.Value
-                | None -> failwith $"No \"value\" attribute defined for element: {elem}")
+                | None -> failwith $"No \"value\" attribute defined for element: {elem}") |> List.ofSeq
             VMap = extractArray event "vmap" valueExtractor |> Map.ofSeq
         }
         extractFromObject log "events" extractor

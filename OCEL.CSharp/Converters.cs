@@ -31,7 +31,7 @@ namespace OCEL.CSharp
                         v => new Types.OcelEvent(
                             v.Value.Activity, 
                             v.Value.Timestamp, 
-                            v.Value.OMap, 
+                            ListModule.OfSeq(v.Value.OMap),
                             v.Value.VMap.ToFSharpMap()))
                     .ToFSharpMap(),
                 objects: log.Objects.ToDictionary(
@@ -78,7 +78,7 @@ namespace OCEL.CSharp
                 case OcelBoolean b:
                     return Types.OcelValue.NewOcelBoolean(b.Value);
                 case OcelList l:
-                    return Types.OcelValue.NewOcelList(l.Values.Select(x => x.FromCSharpOcelValue()));
+                    return Types.OcelValue.NewOcelList(ListModule.OfSeq(l.Values.Select(x => x.FromCSharpOcelValue())));
                 case OcelMap m:
                     return Types.OcelValue.NewOcelMap(m.Values.ToFSharpMap());
                 default:

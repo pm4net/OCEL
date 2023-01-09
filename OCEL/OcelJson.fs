@@ -39,7 +39,7 @@ module OcelJson =
         | JTokenType.String -> OcelString(token.Value<string>())
         | JTokenType.Boolean -> OcelBoolean(token.Value<bool>())
         | JTokenType.Date -> OcelTimestamp(token.Value<DateTimeOffset>())
-        | JTokenType.Array -> OcelList(token.Value<seq<JToken>>() |> Seq.map extractValueFromToken)
+        | JTokenType.Array -> OcelList(token.Value<seq<JToken>>() |> Seq.map extractValueFromToken |> List.ofSeq)
         | JTokenType.Object -> OcelMap(token.Value<JObject>().Children<JProperty>() |> Seq.map (fun p -> p.Name, extractValueFromToken p.First) |> Map.ofSeq)
         | _ -> failwith $"Type {token.Type} on attributes not supported."
 
@@ -92,7 +92,7 @@ module OcelJson =
         let extractor (p: JProperty) props = {
             Activity = (extractTokenFromProperties props "ocel:activity" p.Name).Value<string>()
             Timestamp = (extractTokenFromProperties props "ocel:timestamp" p.Name).Value<DateTimeOffset>()
-            OMap = extractStringArray props "ocel:omap"
+            OMap = extractStringArray props "ocel:omap" |> List.ofSeq
             VMap = extractValueMap props "ocel:vmap"
         }
         extractFromObject jObj "ocel:events" extractor
