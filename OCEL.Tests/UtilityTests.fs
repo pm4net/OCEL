@@ -69,3 +69,61 @@ type UtilityTests(output: ITestOutputHelper) =
 
         merged.Objects.Count = 1 |> Assert.True
         merged.Objects.Keys |> Seq.toList = ["o1"] |> Assert.True
+
+    [<Fact>]
+    let ``Can correctly remove duplicate objects`` () =
+        let timestamp = DateTimeOffset.Now
+
+        let log = {
+            GlobalAttributes = Map.empty
+            Events = [
+                "e1", {
+                    Activity = "Activity 1"
+                    Timestamp = timestamp
+                    OMap = ["o1"]
+                    VMap = Map.empty 
+                }
+                "e2", {
+                    Activity = "Activity 2"
+                    Timestamp = timestamp
+                    OMap = ["o1-duplicate"]
+                    VMap = Map.empty
+                }
+            ] |> Map.ofList
+            Objects = [
+                "o1", {
+                    Type = "Object"
+                    OvMap = ["test", OcelString "some string"; "test2", OcelInteger 123] |> Map.ofList
+                }
+                "o1-duplicate", {
+                    Type = "Object"
+                    OvMap = ["test", OcelString "some string"; "test2", OcelInteger 123] |> Map.ofList
+                }
+            ] |> Map.ofList
+        }
+
+        let correctLog = {
+            GlobalAttributes = Map.empty
+            Events = [
+                "e1", {
+                    Activity = "Activity 1"
+                    Timestamp = timestamp
+                    OMap = ["o1"]
+                    VMap = Map.empty 
+                }
+                "e2", {
+                    Activity = "Activity 2"
+                    Timestamp = timestamp
+                    OMap = ["o1"]
+                    VMap = Map.empty
+                }
+            ] |> Map.ofList
+            Objects = [
+                "o1", {
+                    Type = "Object"
+                    OvMap = ["test", OcelString "some string"; "test2", OcelInteger 123] |> Map.ofList
+                }
+            ] |> Map.ofList
+        }
+
+        log.MergeDuplicateObjects() = correctLog |> Assert.True

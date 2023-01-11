@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using OCEL;
 using OCEL.Types;
 using System.Linq;
 
 namespace OCEL.CSharp
 {
-    public class OcelLog
+    public class OcelLog : IEquatable<OcelLog>
     {
         public OcelLog(
-            Dictionary<string, OcelValue> globalAttributes, 
-            Dictionary<string, OcelEvent> events, 
+            IDictionary<string, OcelValue> globalAttributes, 
+            IDictionary<string, OcelEvent> events, 
             IDictionary<string, OcelObject> objects)
         {
             GlobalAttributes = globalAttributes;
@@ -76,6 +77,18 @@ namespace OCEL.CSharp
                     .ToDictionary(x => x.Key, x => x.Value));
         }
 
+        /// <summary>
+        /// Merge duplicate objects and update the object ID's on the events that reference them.
+        /// This is useful when the same object is repeatedly added without the ability to detect it efficiently, such as in logging.
+        /// </summary>
+        /// <returns>A new log instance with the duplicates removed and references updated.</returns>
+        public OcelLog MergeDuplicateObjects()
+        {
+            // Converts log to F# representation and uses the method there, since the C# implementation uses reference equality for OCEL objects.
+            // This makes it much easier to compare objects, even if nested, using built-in equality checking.
+            return new OcelLog(this.ToFSharpOcelLog().MergeDuplicateObjects());
+        }
+
         private static IEnumerable<string> ExtractKeysFromValue(OcelValue value)
         {
             switch (value)
@@ -93,9 +106,48 @@ namespace OCEL.CSharp
         {
             return mapping.SelectMany(x => ExtractKeysFromValue(x.Value).Append(x.Key));
         }
+
+        /* --- EQUALITY MEMBERS --- */
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return this.ToFSharpOcelLog().IsEqual(((OcelLog)obj).ToFSharpOcelLog());
+        }
+
+        public bool Equals(OcelLog other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return this.ToFSharpOcelLog().IsEqual(other.ToFSharpOcelLog());
+        }
+
+        public static bool operator ==(OcelLog left, OcelLog right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(OcelLog left, OcelLog right)
+        {
+            return !Equals(left, right);
+        }
+
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (GlobalAttributes != null ? GlobalAttributes.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Events != null ? Events.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Objects != null ? Objects.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
     }
 
-    public class OcelEvent
+    public class OcelEvent : IEquatable<OcelEvent>
     {
         public OcelEvent(
             string activity, 
@@ -124,9 +176,49 @@ namespace OCEL.CSharp
         public IEnumerable<string> OMap { get; set; }
 
         public IDictionary<string, OcelValue> VMap { get; set; }
+
+        /* --- EQUALITY MEMBERS --- */
+
+        public bool Equals(OcelEvent other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return this.ToFSharpOcelEvent().IsEqual(other.ToFSharpOcelEvent());
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((OcelEvent)obj);
+        }
+
+        public static bool operator ==(OcelEvent left, OcelEvent right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(OcelEvent left, OcelEvent right)
+        {
+            return !Equals(left, right);
+        }
+
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (Activity != null ? Activity.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ Timestamp.GetHashCode();
+                hashCode = (hashCode * 397) ^ (OMap != null ? OMap.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (VMap != null ? VMap.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
     }
 
-    public class OcelObject
+    public class OcelObject : IEquatable<OcelObject>
     {
         public OcelObject(string type, IDictionary<string, OcelValue> ovMap)
         {
@@ -143,9 +235,45 @@ namespace OCEL.CSharp
         public string Type { get; set; }
 
         public IDictionary<string, OcelValue> OvMap { get; set; }
+
+        /* --- EQUALITY MEMBERS --- */
+
+        public bool Equals(OcelObject other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return other.ToFSharpOcelObject().IsEqual(other.ToFSharpOcelObject());
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((OcelObject)obj);
+        }
+
+        public static bool operator ==(OcelObject left, OcelObject right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(OcelObject left, OcelObject right)
+        {
+            return !Equals(left, right);
+        }
+
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Type != null ? Type.GetHashCode() : 0) * 397) ^ (OvMap != null ? OvMap.GetHashCode() : 0);
+            }
+        }
     }
 
-    public abstract class OcelValue
+    public abstract class OcelValue : IEquatable<OcelValue>
     {
         public static explicit operator OcelValue(Types.OcelValue v)
         {
@@ -168,6 +296,31 @@ namespace OCEL.CSharp
                 default:
                     throw new ArgumentOutOfRangeException(nameof(v));
             }
+        }
+
+        /* --- EQUALITY MEMBERS --- */
+
+        public bool Equals(OcelValue other)
+        {
+            return this.FromCSharpOcelValue().IsEqual(other.FromCSharpOcelValue());
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((OcelValue)obj);
+        }
+
+        public static bool operator ==(OcelValue left, OcelValue right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(OcelValue left, OcelValue right)
+        {
+            return !Equals(left, right);
         }
     }
 

@@ -25,7 +25,7 @@ namespace OCEL.CSharp.Tests
                 {
                     { "ordering", new OcelString("timestamp") },
                 },
-                new Dictionary<string, OcelEvent>()
+                new Dictionary<string, OcelEvent>
                 {
                     { "e1", new OcelEvent("Activity 1", DateTimeOffset.Now, new List<string> { "o1" }, new Dictionary<string, OcelValue>()) },
                     { "e2", new OcelEvent("Activity 2", DateTimeOffset.Now.AddDays(1), new List<string> { "o1" }, new Dictionary<string, OcelValue>()) }
@@ -42,7 +42,7 @@ namespace OCEL.CSharp.Tests
                     { "ordering", new OcelString("timestamp") },
                     { "version", new OcelString("1.0") }
                 },
-                new Dictionary<string, OcelEvent>()
+                new Dictionary<string, OcelEvent>
                 {
                     { "e1", new OcelEvent("Activity 1", DateTimeOffset.Now, new List<string> { "o1" }, new Dictionary<string, OcelValue>()) },
                     { "e3", new OcelEvent("Activity 2", DateTimeOffset.Now.AddDays(1), new List<string> { "o1" }, new Dictionary<string, OcelValue>()) }
@@ -63,6 +63,41 @@ namespace OCEL.CSharp.Tests
 
             Assert.True(merged.Objects.Count == 1);
             Assert.True(merged.Objects.Keys.SequenceEqual(new List<string> { "o1" }));
+        }
+
+        [Fact]
+        public void CanCorrectlyRemoveDuplicateObjects()
+        {
+            var timestamp = DateTimeOffset.Now;
+
+            var log = new OcelLog(
+                new Dictionary<string, OcelValue>(),
+                new Dictionary<string, OcelEvent>
+                {
+                    { "e1", new OcelEvent("Activity 1", timestamp, new List<string> { "o1" }, new Dictionary<string, OcelValue>()) },
+                    { "e2", new OcelEvent("Activity 2", timestamp, new List<string> { "o1-duplicate" }, new Dictionary<string, OcelValue>()) }
+                },
+                new Dictionary<string, OcelObject>
+                {
+                    { "o1", new OcelObject("Object", new Dictionary<string, OcelValue> { { "test", new OcelString("some string") }, { "test2", new OcelInteger(123) } })},
+                    { "o1-duplicate", new OcelObject("Object", new Dictionary<string, OcelValue> { { "test", new OcelString("some string") }, { "test2", new OcelInteger(123) } })},
+                }
+            );
+
+            var correctLog = new OcelLog(
+                new Dictionary<string, OcelValue>(),
+                new Dictionary<string, OcelEvent>
+                {
+                    { "e1", new OcelEvent("Activity 1", timestamp, new List<string> { "o1" }, new Dictionary<string, OcelValue>()) },
+                    { "e2", new OcelEvent("Activity 2", timestamp, new List<string> { "o1" }, new Dictionary<string, OcelValue>()) }
+                },
+                new Dictionary<string, OcelObject>
+                {
+                    { "o1", new OcelObject("Object", new Dictionary<string, OcelValue> { { "test", new OcelString("some string") }, { "test2", new OcelInteger(123) } })}
+                }
+            );
+
+            Assert.True(log.MergeDuplicateObjects() == correctLog);
         }
     }
 }

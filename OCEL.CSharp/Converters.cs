@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.FSharp.Collections;
 
 namespace OCEL.CSharp
 {
-    public static class FSharpConverters
+    internal static class FSharpConverters
     {
         /// <summary>
         /// Create C# instance of an OCEL log from an F# OCEL log
         /// </summary>
         /// <param name="log">The F# OCEL log</param>
         /// <returns>A C# OCEL log</returns>
-        public static OcelLog FromFSharpOcelLog(this Types.OcelLog log)
+        internal static OcelLog FromFSharpOcelLog(this Types.OcelLog log)
         {
             return new OcelLog(log);
         }
@@ -22,7 +23,7 @@ namespace OCEL.CSharp
         /// </summary>
         /// <param name="log">The C# OCEL log</param>
         /// <returns>A F# OCEL log</returns>
-        public static Types.OcelLog ToFSharpOcelLog(this OcelLog log)
+        internal static Types.OcelLog ToFSharpOcelLog(this OcelLog log)
         {
             return new Types.OcelLog(
                 globalAttributes: log.GlobalAttributes.ToFSharpMap(),
@@ -43,27 +44,25 @@ namespace OCEL.CSharp
         }
 
         /// <summary>
-        /// Convert a generic dictionary to a generic F# map
+        /// Create a F# instance of an OCEL event from a C# OCEL event
         /// </summary>
-        private static FSharpMap<TKey, TValue> ToFSharpMap<TKey, TValue>(this IDictionary<TKey, TValue> dict)
+        internal static Types.OcelEvent ToFSharpOcelEvent(this OcelEvent @event)
         {
-            return new FSharpMap<TKey, TValue>(dict.Where(x => x.Value != null).Select(x => new Tuple<TKey, TValue>(x.Key, x.Value)));
+            return new Types.OcelEvent(@event.Activity, @event.Timestamp, ListModule.OfSeq(@event.OMap), ToFSharpMap(@event.VMap));
         }
 
         /// <summary>
-        /// Convert a dictionary with a string and OcelValue to an F# map where the OcelValue is mapped to the F# OcelValue
+        /// Create a F# instance of an OCEL object from a C# OCEL object
         /// </summary>
-        /// <param name="dict"></param>
-        /// <returns></returns>
-        private static FSharpMap<string, Types.OcelValue> ToFSharpMap(this IDictionary<string, OcelValue> dict)
+        internal static Types.OcelObject ToFSharpOcelObject(this OcelObject @object)
         {
-            return dict.Where(x => x.Value != null).ToDictionary(x => x.Key, x => x.Value.FromCSharpOcelValue()).ToFSharpMap();
+            return new Types.OcelObject(@object.Type, ToFSharpMap(@object.OvMap));
         }
 
         /// <summary>
         /// Convert a C# OcelValue to the F# equivalent
         /// </summary>
-        private static Types.OcelValue FromCSharpOcelValue(this OcelValue v)
+        internal static Types.OcelValue FromCSharpOcelValue(this OcelValue v)
         {
             switch (v)
             {
@@ -84,6 +83,24 @@ namespace OCEL.CSharp
                 default:
                     throw new ArgumentOutOfRangeException(nameof(v));
             }
+        }
+
+        /// <summary>
+        /// Convert a generic dictionary to a generic F# map
+        /// </summary>
+        private static FSharpMap<TKey, TValue> ToFSharpMap<TKey, TValue>(this IDictionary<TKey, TValue> dict)
+        {
+            return new FSharpMap<TKey, TValue>(dict.Where(x => x.Value != null).Select(x => new Tuple<TKey, TValue>(x.Key, x.Value)));
+        }
+
+        /// <summary>
+        /// Convert a dictionary with a string and OcelValue to an F# map where the OcelValue is mapped to the F# OcelValue
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <returns></returns>
+        private static FSharpMap<string, Types.OcelValue> ToFSharpMap(this IDictionary<string, OcelValue> dict)
+        {
+            return dict.Where(x => x.Value != null).ToDictionary(x => x.Key, x => x.Value.FromCSharpOcelValue()).ToFSharpMap();
         }
     }
 }

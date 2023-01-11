@@ -93,6 +93,10 @@ type OcelLog with
 
         doAllObjectsReferencedInEventsExist
 
+    /// Compare a log to this log. Useful when handling this type from C# and needing to check for structural-, not reference-equality.
+    member this.IsEqual other =
+        this = other
+
     /// Merge a log with another log. Duplicate keys are overwritten by the other log.
     member this.MergeWith other =
         let mergeMaps a b =
@@ -104,6 +108,40 @@ type OcelLog with
             Objects = (this.Objects, other.Objects) ||> mergeMaps
         }
 
+    /// Merge duplicate objects and update the object ID's on the events that reference them.
+    /// This is useful when the same object is repeatedly added without the ability to detect it efficiently, such as in logging.
+    member this.MergeDuplicateObjects () =
+        // Group by the object itself, and extract all ID's that reference this same object
+        let objs = this.Objects |> Map.toList |> List.groupBy snd |> List.map (fun (key, objs) -> objs |> List.map fst, key)
+        // Create updated mapping where each object only appears once, and has the ID of the first encountered version of it
+        let updatedObjs = objs |> List.map (fun (ids, o) -> ids.Head, o) |> Map.ofList
+
+        // Create updated event mapping where each object reference is updated to reflect the new ID of an object, in case it was removed due to duplication
+        let updatedEvents =
+            this.Events
+            |> Map.toList
+            |> List.map (fun (id, e) ->
+                id, 
+                { e with 
+                    OMap =
+                        e.OMap
+                        |> List.map (fun o -> 
+                            // For each object reference, find the list of objects that contains the ID. 
+                            // Then simply take the first ID and use it, since we previously always picked the first ID for duplicate objects.
+                            objs 
+                            |> List.find (fun l -> fst l |> List.contains o) 
+                            |> fst 
+                            |> List.head
+                        )
+                }
+            )
+            |> Map.ofList
+
+        { this with
+            Events = updatedEvents
+            Objects = updatedObjs
+        }
+
     /// An empty log
     static member Empty =
         {
@@ -111,3 +149,18 @@ type OcelLog with
             Events = Map.empty
             Objects = Map.empty
         }
+
+type OcelEvent with
+    /// Compare a log to this log. Useful when handling this type from C# and needing to check for structural-, not reference-equality.
+    member this.IsEqual other =
+        this = other
+
+type OcelObject with
+    /// Compare a log to this log. Useful when handling this type from C# and needing to check for structural-, not reference-equality.
+    member this.IsEqual other =
+        this = other
+
+type OcelValue with
+    /// Compare a log to this log. Useful when handling this type from C# and needing to check for structural-, not reference-equality.
+    member this.IsEqual other =
+        this = other
