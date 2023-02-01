@@ -13,7 +13,7 @@ namespace OCEL.CSharp
         /// <summary>
         /// Validate a LiteDatabase in terms of its structure and content against the OCEL standard, with error messages.
         /// </summary>
-        public static Tuple<bool, IEnumerable<string>> ValidateWithErrorMessages(LiteDatabase db)
+        public static Tuple<bool, IEnumerable<string>> ValidateWithErrorMessages(ILiteDatabase db)
         {
             return OCEL.OcelLiteDB.validateWithErrorMessage(db);
         }
@@ -21,7 +21,7 @@ namespace OCEL.CSharp
         /// <summary>
         /// Validate a LiteDatabase in terms of its structure and content against the OCEL standard.
         /// </summary>
-        public static bool Validate(LiteDatabase db)
+        public static bool Validate(ILiteDatabase db)
         {
             return OCEL.OcelLiteDB.validate(db);
         }
@@ -29,7 +29,7 @@ namespace OCEL.CSharp
         /// <summary>
         /// Deserialize a LiteDatabase to an OCEL log.
         /// </summary>
-        public static OcelLog Deserialize(LiteDatabase db)
+        public static OcelLog Deserialize(ILiteDatabase db)
         {
             return OCEL.OcelLiteDB.deserialize(db).FromFSharpOcelLog();
         }
@@ -37,7 +37,7 @@ namespace OCEL.CSharp
         /// <summary>
         /// Serialize an OCEL log into a LiteDatabase. Existing data is preserved and appended to.
         /// </summary>
-        public static void Serialize(LiteDatabase db, OcelLog log)
+        public static void Serialize(ILiteDatabase db, OcelLog log)
         {
             OCEL.OcelLiteDB.serialize(db, log.ToFSharpOcelLog());
         }

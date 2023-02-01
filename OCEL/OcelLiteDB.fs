@@ -125,7 +125,7 @@ module OcelLiteDB =
     (* --- PUBLIC MEMBERS --- *)
     
     /// <inheritdoc />
-    let validateWithErrorMessage (db: LiteDatabase) =
+    let validateWithErrorMessage (db: ILiteDatabase) =
         let mutable errors = []
         if db.CollectionExists "events" |> not then errors <- "Collection 'events' does not exist." :: errors
         if db.CollectionExists "objects" |> not then errors <- "Collection 'objects' does not exist." :: errors
@@ -133,11 +133,11 @@ module OcelLiteDB =
         errors.IsEmpty, errors |> List.rev :> seq<_>
         
     /// <inheritdoc />
-    let validate (db: LiteDatabase) =
+    let validate (db: ILiteDatabase) =
         db |> validateWithErrorMessage |> fst
     
     /// <inheritdoc />
-    let deserialize (db: LiteDatabase)  =
+    let deserialize (db: ILiteDatabase)  =
         configureBsonmapper()
         {
             Events = db.GetCollection<string * OcelEvent>("events").FindAll() |> Map.ofSeq
@@ -146,7 +146,7 @@ module OcelLiteDB =
         }
     
     /// <inheritdoc />
-    let serialize (db: LiteDatabase) (log: OcelLog) =
+    let serialize (db: ILiteDatabase) (log: OcelLog) =
         let insertConditional (cond: ILiteCollection<'a> -> 'a -> bool) coll objs =
             objs |> Seq.filter (cond coll) |> coll.InsertBulk
 
