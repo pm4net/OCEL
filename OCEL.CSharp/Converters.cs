@@ -6,7 +6,7 @@ using Microsoft.FSharp.Collections;
 
 namespace OCEL.CSharp
 {
-    internal static class FSharpConverters
+    public static class FSharpConverters
     {
         /// <summary>
         /// Create C# instance of an OCEL log from an F# OCEL log
