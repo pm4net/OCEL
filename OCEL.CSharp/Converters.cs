@@ -13,7 +13,7 @@ namespace OCEL.CSharp
         /// </summary>
         /// <param name="log">The F# OCEL log</param>
         /// <returns>A C# OCEL log</returns>
-        internal static OcelLog FromFSharpOcelLog(this Types.OcelLog log)
+        public static OcelLog FromFSharpOcelLog(this Types.OcelLog log)
         {
             return new OcelLog(log);
         }
@@ -23,7 +23,7 @@ namespace OCEL.CSharp
         /// </summary>
         /// <param name="log">The C# OCEL log</param>
         /// <returns>A F# OCEL log</returns>
-        internal static Types.OcelLog ToFSharpOcelLog(this OcelLog log)
+        public static Types.OcelLog ToFSharpOcelLog(this OcelLog log)
         {
             return new Types.OcelLog(
                 globalAttributes: log.GlobalAttributes.ToFSharpMap(),
