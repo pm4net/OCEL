@@ -302,7 +302,7 @@ namespace OCEL.CSharp
 
         public bool Equals(OcelValue other)
         {
-            return this.FromCSharpOcelValue().IsEqual(other.FromCSharpOcelValue());
+            return this.ToFSharpOcelValue().IsEqual(other.ToFSharpOcelValue());
         }
 
         public override bool Equals(object obj)
