@@ -13,6 +13,8 @@
     <PackageDescription>Object-Centric Event Log (OCEL) is a standard interchange format for object-centric event data with multiple case notions. This library aims to implement this standard in .NET with a high degree of type safety.</PackageDescription>
     <PackageProjectUrl>https://github.com/pm4net/OCEL</PackageProjectUrl>
     <RepositoryUrl>https://github.com/pm4net/OCEL.git</RepositoryUrl>
+	<IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
