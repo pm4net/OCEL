@@ -20,7 +20,7 @@ namespace OCEL.CSharp.Tests
         public void CanConvertSampleOcelJsonToOcelXml()
         {
             var json = File.ReadAllText("minimal.jsonocel");
-            var log = OcelJson.Deserialize(json);
+            var log = OcelJson.Deserialize(json, true);
             var xml = OcelXml.Serialize(log, Formatting.Indented);
             var valid = OcelXml.Validate(xml);
             _output.WriteLine($"Serialized XML:{Environment.NewLine}{xml}");
@@ -42,7 +42,7 @@ namespace OCEL.CSharp.Tests
         public void CanConvertNestedSampleOcelJsonToOcelXml()
         {
             var json = File.ReadAllText("minimal_nested.jsonocel");
-            var log = OcelJson.Deserialize(json);
+            var log = OcelJson.Deserialize(json, true);
             var xml = OcelXml.Serialize(log, Formatting.Indented);
             var valid = OcelXml.Validate(xml);
             _output.WriteLine($"Serialized XML:{Environment.NewLine}{xml}");
@@ -64,7 +64,7 @@ namespace OCEL.CSharp.Tests
         public void CanConvertSampleOcelJsonToLiteDb()
         {
             var json = File.ReadAllText("minimal.jsonocel");
-            var log = OcelJson.Deserialize(json);
+            var log = OcelJson.Deserialize(json, true);
             var liteDb = new LiteDatabase(":memory:");
             OcelLiteDB.Serialize(liteDb, log);
         }

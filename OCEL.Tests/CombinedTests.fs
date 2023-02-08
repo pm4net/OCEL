@@ -14,7 +14,7 @@ type CombinedTests(output: ITestOutputHelper) =
     [<Fact>]
     member _.``Can convert sample OCEL-JSON to OCEL-XML`` () =
         let json = File.ReadAllText("minimal.jsonocel")
-        let log = OcelJson.deserialize json
+        let log = OcelJson.deserialize true json
         let xml = OcelXml.serialize Formatting.Indented log
         output.WriteLine $"Serialized XML:{Environment.NewLine}{xml}"
         OcelXml.validate xml |> Assert.True
@@ -22,7 +22,7 @@ type CombinedTests(output: ITestOutputHelper) =
     [<Fact>]
     member _.``Can convert sample nested OCEL-JSON to OCEL-XML`` () =
         let json = File.ReadAllText("minimal_nested.jsonocel")
-        let log = OcelJson.deserialize json
+        let log = OcelJson.deserialize true json
         let xml = OcelXml.serialize Formatting.Indented log
         output.WriteLine $"Serialized XML:{Environment.NewLine}{xml}"
         OcelXml.validate xml |> Assert.True
@@ -46,7 +46,7 @@ type CombinedTests(output: ITestOutputHelper) =
     [<Fact>]
     member _.``Can convert sample OCEL-JSON to LiteDB`` () =
         let json = File.ReadAllText("minimal.jsonocel")
-        let log = OcelJson.deserialize json
+        let log = OcelJson.deserialize true json
         let liteDb = new LiteDatabase(":memory:")
         OCEL.OcelLiteDB.serialize liteDb log
 

@@ -129,16 +129,20 @@ module OcelJson =
         (parseWithDateTimeOffsetHandling json).IsValid Schema
 
     /// <inheritdoc />
-    let deserialize json =
-        let jObj = parseWithDateTimeOffsetHandling json
-        match validateJObjectWithErrorMessages jObj with
-        | false, errors -> failwith $"""JSON not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat Environment.NewLine}."""
-        | true, _ ->
-            {
+    let deserialize validate json =
+        let extractFromJObj jObj = {
                 GlobalAttributes = extractAttributesFromGlobalLog jObj
                 Events = extractEvents jObj
                 Objects = extractObjects jObj
             }
+
+        let jObj = parseWithDateTimeOffsetHandling json
+        match validate with
+        | true -> 
+            match validateJObjectWithErrorMessages jObj with
+            | false, errors -> failwith $"""JSON not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat Environment.NewLine}."""
+            | true, _ -> jObj |> extractFromJObj
+        | _ -> jObj |> extractFromJObj
     
     /// <inheritdoc />
     let serialize (formatting: OCEL.Types.Formatting) (log: OcelLog) : string =

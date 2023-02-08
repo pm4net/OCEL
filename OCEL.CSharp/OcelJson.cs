@@ -28,9 +28,9 @@ namespace OCEL.CSharp
         /// <summary>
         /// Deserialize a JSON string into an OCEL log, and validate it against the OCEL schema.
         /// </summary>
-        public static OcelLog Deserialize(string json)
+        public static OcelLog Deserialize(string json, bool validate)
         {
-            return OCEL.OcelJson.deserialize(json).FromFSharpOcelLog();
+            return OCEL.OcelJson.deserialize(validate, json).FromFSharpOcelLog();
         }
 
         /// <summary>
