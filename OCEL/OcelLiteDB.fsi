@@ -11,4 +11,4 @@ module OcelLiteDB =
     /// Deserialize a LiteDatabase to an OCEL log.
     val deserialize : ILiteDatabase -> OcelLog
     /// Serialize an OCEL log into a LiteDatabase. Existing data is preserved and appended to.
-    val serialize : ILiteDatabase -> OcelLog -> unit
+    val serialize : bool -> ILiteDatabase -> OcelLog -> unit

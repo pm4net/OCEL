@@ -48,11 +48,11 @@ type CombinedTests(output: ITestOutputHelper) =
         let json = File.ReadAllText("minimal.jsonocel")
         let log = OcelJson.deserialize true json
         let liteDb = new LiteDatabase(":memory:")
-        OCEL.OcelLiteDB.serialize liteDb log
+        OCEL.OcelLiteDB.serialize true liteDb log
 
     [<Fact>]
     member _.``Can convert sample OCEL-XML to LiteDB`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         let log = OcelXml.deserialize xml
         let liteDb = new LiteDatabase(":memory:")
-        OCEL.OcelLiteDB.serialize liteDb log
+        OCEL.OcelLiteDB.serialize true liteDb log

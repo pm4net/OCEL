@@ -64,13 +64,13 @@ type LiteDbTests(output: ITestOutputHelper) =
     [<Fact>]
     member _.``Can serialize basic log`` () =
         let db = new LiteDatabase(":memory:")
-        OCEL.OcelLiteDB.serialize db log
+        OCEL.OcelLiteDB.serialize true db log
         testCorrectNumberOfElements db log
 
     [<Fact>]
     member _.``Can serialize and deserialize basic log`` () =
         let db = new LiteDatabase(":memory:")
-        OCEL.OcelLiteDB.serialize db log
+        OCEL.OcelLiteDB.serialize true db log
         testCorrectNumberOfElements db log
         let deserializedLog = OCEL.OcelLiteDB.deserialize db
         deserializedLog.IsValid |> Assert.True
@@ -79,18 +79,18 @@ type LiteDbTests(output: ITestOutputHelper) =
     [<Fact>]
     member _.``Can serialize basic log multiple times without error`` () =
         let db = new LiteDatabase(":memory:")
-        OCEL.OcelLiteDB.serialize db log
-        OCEL.OcelLiteDB.serialize db log
+        OCEL.OcelLiteDB.serialize true db log
+        OCEL.OcelLiteDB.serialize true db log
         testCorrectNumberOfElements db log
 
     [<Fact>]
     member _.``Can serialize basic log to disk`` () =
         let db = new LiteDatabase(":temp:")
-        OCEL.OcelLiteDB.serialize db log
+        OCEL.OcelLiteDB.serialize true db log
         testCorrectNumberOfElements db log
 
     [<Fact>]
     member _.``Serialized basic log is valid`` () =
         let db = new LiteDatabase(":memory:")
-        OCEL.OcelLiteDB.serialize db log
+        OCEL.OcelLiteDB.serialize true db log
         OCEL.OcelLiteDB.validate db |> Assert.True

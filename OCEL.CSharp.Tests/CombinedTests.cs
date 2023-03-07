@@ -66,7 +66,7 @@ namespace OCEL.CSharp.Tests
             var json = File.ReadAllText("minimal.jsonocel");
             var log = OcelJson.Deserialize(json, true);
             var liteDb = new LiteDatabase(":memory:");
-            OcelLiteDB.Serialize(liteDb, log);
+            OcelLiteDB.Serialize(liteDb, log, true);
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace OCEL.CSharp.Tests
             var xml = File.ReadAllText("minimal.xmlocel");
             var log = OcelXml.Deserialize(xml);
             var liteDb = new LiteDatabase(":memory:");
-            OcelLiteDB.Serialize(liteDb, log);
+            OcelLiteDB.Serialize(liteDb, log, true);
         }
     }
 }

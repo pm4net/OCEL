@@ -146,7 +146,10 @@ module OcelLiteDB =
         }
     
     /// <inheritdoc />
-    let serialize (db: ILiteDatabase) (log: OcelLog) =
+    let serialize checkForDuplicates (db: ILiteDatabase) (log: OcelLog) =
+        let insert (coll: ILiteCollection<'a>) objs =
+            objs |> coll.InsertBulk
+
         let insertConditional (cond: ILiteCollection<'a> -> 'a -> bool) coll objs =
             objs |> Seq.filter (cond coll) |> coll.InsertBulk
 
@@ -156,12 +159,12 @@ module OcelLiteDB =
         configureBsonmapper()
 
         let eventsColl = db.GetCollection<string * OcelEvent>("events")
-        (eventsColl, log.Events |> Map.toSeq) ||> insertConditional skipDuplicateId |> ignore
+        (eventsColl, log.Events |> Map.toSeq) ||> (if checkForDuplicates then insertConditional skipDuplicateId else insert) |> ignore
         eventsColl.EnsureIndex("event_activities", "$.events.activity", false) |> ignore
         eventsColl.EnsureIndex("event_objects", "$.events.omap", false) |> ignore
         
         let objectsColl = db.GetCollection<string * OcelObject>("objects")
-        (objectsColl, log.Objects |> Map.toSeq) ||> insertConditional skipDuplicateId |> ignore
+        (objectsColl, log.Objects |> Map.toSeq) ||> (if checkForDuplicates then insertConditional skipDuplicateId else insert) |> ignore
         objectsColl.EnsureIndex("object_types", "$.objects.type", false) |> ignore
 
         let globalAttrsColl = db.GetCollection<string * OcelValue>("global_attributes")

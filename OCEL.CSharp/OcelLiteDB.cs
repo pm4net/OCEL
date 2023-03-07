@@ -37,9 +37,9 @@ namespace OCEL.CSharp
         /// <summary>
         /// Serialize an OCEL log into a LiteDatabase. Existing data is preserved and appended to.
         /// </summary>
-        public static void Serialize(ILiteDatabase db, OcelLog log)
+        public static void Serialize(ILiteDatabase db, OcelLog log, bool checkForDuplicates)
         {
-            OCEL.OcelLiteDB.serialize(db, log.ToFSharpOcelLog());
+            OCEL.OcelLiteDB.serialize(checkForDuplicates, db, log.ToFSharpOcelLog());
         }
     }
 }
