@@ -69,7 +69,6 @@ namespace OCEL.CSharp.Tests
         public void CanCorrectlyRemoveDuplicateObjects()
         {
             var timestamp = DateTimeOffset.Now;
-
             var log = new OcelLog(
                 new Dictionary<string, OcelValue>(),
                 new Dictionary<string, OcelEvent>
@@ -98,6 +97,93 @@ namespace OCEL.CSharp.Tests
             );
 
             Assert.True(log.MergeDuplicateObjects() == correctLog);
+        }
+
+        [Fact]
+        public void CanCorrectlyConvertObjectsToAttributes()
+        {
+            var timestamp = DateTimeOffset.Now;
+            var log = new OcelLog(
+                new Dictionary<string, OcelValue>(),
+                new Dictionary<string, OcelEvent>
+                {
+                    { "e1", new OcelEvent("Activity 1", timestamp, new List<string> { "o1", "o2" }, new Dictionary<string, OcelValue>()) },
+                    { "e2", new OcelEvent("Activity 2", timestamp, new List<string> { "o2" }, new Dictionary<string, OcelValue>()) }
+                },
+                new Dictionary<string, OcelObject>
+                {
+                    { "o1", new OcelObject("Type 1", new Dictionary<string, OcelValue> { { "prop1", new OcelString("some string") }, { "prop2", new OcelInteger(123) } })},
+                    { "o2", new OcelObject("Type 2", new Dictionary<string, OcelValue> { { "prop1", new OcelBoolean(false) } })},
+                }
+            );
+
+            var correctLog = new OcelLog(
+                new Dictionary<string, OcelValue>(),
+                new Dictionary<string, OcelEvent>
+                {
+                    { "e1", new OcelEvent("Activity 1", timestamp, new List<string>(), 
+                        new Dictionary<string, OcelValue>
+                        {
+                            { "Type 1", new OcelMap(new Dictionary<string, OcelValue> {
+                                { "prop1", new OcelString("some string") },
+                                { "prop2", new OcelInteger(123) }
+                            })},
+                            { "Type 2", new OcelBoolean(false) }
+                        })
+                    },
+                    { "e2", new OcelEvent("Activity 2", timestamp, new List<string>(), new Dictionary<string, OcelValue>
+                    {
+                        { "Type 2", new OcelBoolean(false) }
+                    })}
+                },
+                new Dictionary<string, OcelObject>()
+            );
+
+            Assert.True(log.ConvertObjectsToAttributes(new List<string> { "Type 1", "Type 2" }) == correctLog);
+        }
+
+        [Fact]
+        public void CanCorrectlyConvertAttributesToObjects()
+        {
+            var timestamp = DateTimeOffset.Now;
+            var log = new OcelLog(
+                new Dictionary<string, OcelValue>(),
+                new Dictionary<string, OcelEvent>
+                {
+                    { "e1", new OcelEvent("Activity 1", timestamp, new List<string>(),
+                        new Dictionary<string, OcelValue>
+                        {
+                            { "Type 1", new OcelMap(new Dictionary<string, OcelValue> {
+                                { "prop1", new OcelString("some string") },
+                                { "prop2", new OcelInteger(123) }
+                            })},
+                            { "Type 2", new OcelBoolean(false) }
+                        })
+                    },
+                    { "e2", new OcelEvent("Activity 2", timestamp, new List<string>(), new Dictionary<string, OcelValue>
+                    {
+                        { "Type 2", new OcelBoolean(false) }
+                    })}
+                },
+                new Dictionary<string, OcelObject>()
+            );
+
+            var result = log.ConvertAttributesToObjects(new List<string> { "Type 1", "Type 2" });
+            Assert.All(result.Events, e =>
+            {
+                switch (e.Key)
+                {
+                    case "e1":
+                        Assert.True(e.Value.OMap.Count() == 2 && e.Value.VMap.Count == 0);
+                        return;
+                    case "e2":
+                        Assert.True(e.Value.OMap.Count() == 1 && e.Value.VMap.Count == 0);
+                        return;
+                    default:
+                        throw new Exception("Unknown event");
+                }
+            });
+            Assert.True(result.Objects.Count == 2);
         }
     }
 }

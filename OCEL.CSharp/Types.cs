@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using OCEL;
 using OCEL.Types;
 using System.Linq;
+using Microsoft.FSharp.Collections;
 
 namespace OCEL.CSharp
 {
@@ -87,6 +88,26 @@ namespace OCEL.CSharp
             // Converts log to F# representation and uses the method there, since the C# implementation uses reference equality for OCEL objects.
             // This makes it much easier to compare objects, even if nested, using built-in equality checking.
             return new OcelLog(this.ToFSharpOcelLog().MergeDuplicateObjects());
+        }
+
+        /// <summary>
+        /// Convert a list of object types to attributes by moving objects to all events that reference them.
+        /// </summary>
+        /// <param name="objectTypes">The object types that should be converted.</param>
+        /// <returns>An updated OCEL log with objects moved to events.</returns>
+        public OcelLog ConvertObjectsToAttributes(IEnumerable<string> objectTypes)
+        {
+            return new OcelLog(this.ToFSharpOcelLog().ConvertObjectsToAttributes(ListModule.OfSeq(objectTypes)));
+        }
+
+        /// <summary>
+        /// Convert a list of attributes to objects by moving attributes to new objects and add references to the events.
+        /// </summary>
+        /// <param name="attributes"></param>
+        /// <returns></returns>
+        public OcelLog ConvertAttributesToObjects(IEnumerable<string> attributes)
+        {
+            return new OcelLog(this.ToFSharpOcelLog().ConvertAttributesToObjects(ListModule.OfSeq(attributes)));
         }
 
         private static IEnumerable<string> ExtractKeysFromValue(OcelValue value)
