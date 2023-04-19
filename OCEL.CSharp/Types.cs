@@ -4,7 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 using OCEL;
 using OCEL.Types;
 using System.Linq;
+using System.Runtime.Serialization;
 using Microsoft.FSharp.Collections;
+using Newtonsoft.Json;
+using NJsonSchema.Converters;
 
 namespace OCEL.CSharp
 {
@@ -68,13 +71,13 @@ namespace OCEL.CSharp
         {
             return new OcelLog(
                 this.GlobalAttributes
-                    .Concat(other.GlobalAttributes.Where(x => !this.GlobalAttributes.Keys.Contains(x.Key)))
+                    .Concat(other.GlobalAttributes.Where(x => !GlobalAttributes.Keys.Contains(x.Key)))
                     .ToDictionary(x => x.Key, x => x.Value),
                 this.Events
-                    .Concat(other.Events.Where(x => !this.Events.Keys.Contains(x.Key)))
+                    .Concat(other.Events.Where(x => !Events.ContainsKey(x.Key)))
                     .ToDictionary(x => x.Key, x => x.Value),
                 this.Objects
-                    .Concat(other.Objects.Where(x => !this.Objects.Keys.Contains(x.Key)))                                         
+                    .Concat(other.Objects.Where(x => !Objects.ContainsKey(x.Key)))                                         
                     .ToDictionary(x => x.Key, x => x.Value));
         }
 
@@ -294,6 +297,15 @@ namespace OCEL.CSharp
         }
     }
 
+    // To allow NSwag to correctly generate subclasses (see https://github.com/RicoSuter/NSwag/issues/1766)
+    [KnownType(typeof(OcelString))]
+    [KnownType(typeof(OcelTimestamp))]
+    [KnownType(typeof(OcelInteger))]
+    [KnownType(typeof(OcelFloat))]
+    [KnownType(typeof(OcelBoolean))]
+    [KnownType(typeof(OcelList))]
+    [KnownType(typeof(OcelMap))]
+    [JsonConverter(typeof(JsonInheritanceConverter), "discriminator")]
     public abstract class OcelValue : IEquatable<OcelValue>
     {
         public static explicit operator OcelValue(Types.OcelValue v)
@@ -319,9 +331,11 @@ namespace OCEL.CSharp
             }
         }
 
-        /* --- EQUALITY MEMBERS --- */
+		/* --- EQUALITY MEMBERS --- */
 
-        public bool Equals(OcelValue other)
+		public abstract override int GetHashCode();
+
+		public bool Equals(OcelValue other)
         {
             return this.ToFSharpOcelValue().IsEqual(other.ToFSharpOcelValue());
         }
@@ -353,6 +367,13 @@ namespace OCEL.CSharp
         }
 
         public string Value { get; set; }
+        
+
+        public override int GetHashCode()
+        {
+	        // ReSharper disable once NonReadonlyMemberInGetHashCode
+	        return Value.GetHashCode();
+        }
     }
 
     public class OcelTimestamp : OcelValue
@@ -363,6 +384,12 @@ namespace OCEL.CSharp
         }
 
         public DateTimeOffset Value { get; set; }
+
+        public override int GetHashCode()
+        {
+	        // ReSharper disable once NonReadonlyMemberInGetHashCode
+	        return Value.GetHashCode();
+        }
     }
 
     public class OcelInteger : OcelValue
@@ -373,6 +400,12 @@ namespace OCEL.CSharp
         }
 
         public long Value { get; set; }
+
+        public override int GetHashCode()
+        {
+	        // ReSharper disable once NonReadonlyMemberInGetHashCode
+	        return Value.GetHashCode();
+        }
     }
 
     public class OcelFloat : OcelValue
@@ -383,7 +416,13 @@ namespace OCEL.CSharp
         }
 
         public double Value { get; set; }
-    }
+
+        public override int GetHashCode()
+        {
+	        // ReSharper disable once NonReadonlyMemberInGetHashCode
+	        return Value.GetHashCode();
+        }
+	}
 
     public class OcelBoolean : OcelValue
     {
@@ -393,7 +432,13 @@ namespace OCEL.CSharp
         }
 
         public bool Value { get; set; }
-    }
+
+        public override int GetHashCode()
+        {
+	        // ReSharper disable once NonReadonlyMemberInGetHashCode
+	        return Value.GetHashCode();
+        }
+	}
 
     public class OcelList : OcelValue
     {
@@ -403,7 +448,13 @@ namespace OCEL.CSharp
         }
 
         public IEnumerable<OcelValue> Values { get; set; }
-    }
+
+        public override int GetHashCode()
+        {
+	        // ReSharper disable once NonReadonlyMemberInGetHashCode
+	        return Values.GetHashCode();
+        }
+	}
 
     public class OcelMap : OcelValue
     {
@@ -413,5 +464,11 @@ namespace OCEL.CSharp
         }
 
         public IDictionary<string, OcelValue> Values { get; set; }
-    }
+
+        public override int GetHashCode()
+        {
+	        // ReSharper disable once NonReadonlyMemberInGetHashCode
+	        return Values.GetHashCode();
+        }
+	}
 }
