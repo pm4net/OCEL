@@ -187,7 +187,7 @@ type OcelLog with
                 OvMap = 
                     match event.VMap[attr] with
                     | OcelMap m -> m
-                    | _ -> ["value", event.VMap[attr]] |> Map.ofList
+                    | _ -> [attr, event.VMap[attr]] |> Map.ofList
             }
 
             { log with
