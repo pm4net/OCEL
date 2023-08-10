@@ -191,28 +191,33 @@ module OcelXml =
     (* --- PUBLIC MEMBERS --- *)
 
     /// <inheritdoc />
-    let validateWithErrorMessages (xml: string) =
+    let validateWithErrorMessages xml =
         let xDoc = XDocument.Parse xml
         xDoc |> validateXDocumentWithErrorMessages
         
     /// <inheritdoc />
-    let validate (xml: string) =
+    let validate xml =
         xml |> validateWithErrorMessages |> fst
 
     /// <inheritdoc />
-    let deserialize (xml: string) =
+    let deserialize validate xml =
+
+        let extractFromXElement xElm = {
+            GlobalAttributes = extractAttributesFromGlobalLog xElm
+            Events = extractEvents xElm
+            Objects = extractObjects xElm
+        }
+
         let xDoc = XDocument.Parse xml
         match xDoc.Elements() |> Seq.tryFind (fun e -> e.Name.LocalName = "log") with
         | None -> failwith "No root element <log> defined."
         | Some xElm ->
-            match xDoc |> validateXDocumentWithErrorMessages with
-            | false, errors -> failwith $"""XML not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat Environment.NewLine}."""
-            | true, _ ->
-                {
-                    GlobalAttributes = extractAttributesFromGlobalLog xElm
-                    Events = extractEvents xElm
-                    Objects = extractObjects xElm
-                }
+            match validate with
+            | true ->
+                match xDoc |> validateXDocumentWithErrorMessages with
+                | false, errors -> failwith $"""XML not validated by schema. Errors:{Environment.NewLine}{errors |> String.concat Environment.NewLine}."""
+                | true, _ -> xElm |> extractFromXElement
+            | _ -> xElm |> extractFromXElement
 
     /// <inheritdoc />
     let serialize formatting (log: OcelLog) =

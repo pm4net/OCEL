@@ -27,9 +27,9 @@ namespace OCEL.CSharp
         /// <summary>
         /// Deserialize a XML string into an OCEL log, and validate it against the OCEL schema.
         /// </summary>
-        public static OcelLog Deserialize(string xml)
+        public static OcelLog Deserialize(string xml, bool validate)
         {
-            return OCEL.OcelXml.deserialize(xml).FromFSharpOcelLog();
+            return OCEL.OcelXml.deserialize(validate, xml).FromFSharpOcelLog();
         }
 
         /// <summary>
