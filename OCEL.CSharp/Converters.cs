@@ -98,9 +98,9 @@ namespace OCEL.CSharp
                     return new OcelList(ocelList.Item.Select(FromFSharpOcelValue));
                 case Types.OcelValue.OcelMap ocelMap:
                     return new OcelMap(ocelMap.Item.ToDictionary(x => x.Key, x => x.Value.FromFSharpOcelValue()));
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(v));
             }
+
+            return v.IsOcelNull ? new OcelNull() : throw new ArgumentOutOfRangeException(nameof(v));
         }
 
         /// <summary>
@@ -124,6 +124,8 @@ namespace OCEL.CSharp
                     return Types.OcelValue.NewOcelList(ListModule.OfSeq(l.Values.Select(x => x.ToFSharpOcelValue())));
                 case OcelMap m:
                     return Types.OcelValue.NewOcelMap(m.Values.ToFSharpMap());
+                case OcelNull n:
+                    return Types.OcelValue.OcelNull;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(v));
             }
