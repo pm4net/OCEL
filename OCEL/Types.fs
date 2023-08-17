@@ -18,6 +18,7 @@ type OcelValue =
     | OcelBoolean of bool
     | OcelList of OcelValue list
     | OcelMap of OcelAttributes 
+    | OcelNull
 
 and OcelAttributes = Map<string, OcelValue>
 

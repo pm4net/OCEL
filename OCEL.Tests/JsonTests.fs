@@ -32,6 +32,11 @@ type JsonTests(output: ITestOutputHelper) =
         parsed.IsValid |> Assert.True
 
     [<Fact>]
+    member _.``Can parse "p2p" log`` () =
+        let json = File.ReadAllText("p2p.jsonocel")
+        json |> OcelJson.deserialize true |> Assert.NotNull
+
+    [<Fact>]
     member _.``Can parse "GitHub pm4py" log`` () =
         let json = File.ReadAllText("github_pm4py.jsonocel")
         json |> OcelJson.deserialize true |> Assert.NotNull

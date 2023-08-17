@@ -58,6 +58,9 @@
 	<Content Include="..\Samples\github_pm4py.db">
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</Content>
+	<Content Include="..\Samples\p2p.jsonocel">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
   </ItemGroup>
 
 </Project>
