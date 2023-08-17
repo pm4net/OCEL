@@ -46,6 +46,9 @@ module OcelLiteDB =
                 | OcelMap m ->
                     doc["type"] <- nameof(OcelMap)
                     doc["val"] <- m |> Map.map (fun _ v -> ocelValueSerializer v) |> Map.toSeq |> dict |> BsonDocument
+                | OcelNull ->
+                    doc["type"] <- nameof(OcelNull)
+                    doc["val"] <- null
                 doc :> BsonValue)
 
         let rec ocelValueDeserializer =
@@ -58,6 +61,7 @@ module OcelLiteDB =
                 | nameof(OcelBoolean), v -> OcelBoolean v.AsBoolean
                 | nameof(OcelList), v -> v.AsArray |> Seq.map ocelValueDeserializer |> List.ofSeq |> OcelList
                 | nameof(OcelMap), v -> v.AsDocument |> Seq.map (fun kv -> kv.Key, ocelValueDeserializer kv.Value) |> Map.ofSeq |> OcelMap
+                | nameof(OcelNull), _ -> OcelNull
                 | _ -> raise (ArgumentOutOfRangeException "type"))
 
         BsonMapper.Global.RegisterType<OcelValue>(ocelValueSerializer, ocelValueDeserializer)

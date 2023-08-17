@@ -253,6 +253,7 @@ module OcelXml =
             | OcelBoolean b -> createXElem "boolean" key (b.ToString(CultureInfo.InvariantCulture).ToLower())
             | OcelList l -> createXElem "list" key (l |> Seq.map (fun v -> createXElementFromKeyOcelValue "list-item" v))
             | OcelMap m -> createXElem "list" key (m |> Seq.map (fun kv -> createXElementFromKeyOcelValue kv.Key kv.Value))
+            | OcelNull -> createXElem "string" key ""
 
         /// Create a list of string of elements, given the key for the list and the key for each list item
         let createXElementList listKey itemKey items =

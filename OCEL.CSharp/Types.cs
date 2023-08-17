@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using OCEL;
-using OCEL.Types;
 using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.FSharp.Collections;
@@ -305,6 +303,7 @@ namespace OCEL.CSharp
     [KnownType(typeof(OcelBoolean))]
     [KnownType(typeof(OcelList))]
     [KnownType(typeof(OcelMap))]
+    [KnownType(typeof(OcelNull))]
     [JsonConverter(typeof(JsonInheritanceConverter), "discriminator")]
     public abstract class OcelValue : IEquatable<OcelValue>
     {
@@ -323,12 +322,12 @@ namespace OCEL.CSharp
                 case Types.OcelValue.OcelBoolean b:
                     return new OcelBoolean(b.Item);
                 case Types.OcelValue.OcelList l:
-                    return new OcelList(l.Item.Select(x => (OcelValue) x));
+                    return new OcelList(l.Item.Select(x => x.FromFSharpOcelValue()));
                 case Types.OcelValue.OcelMap m:
-                    return new OcelMap(m.Item.ToDictionary(x => x.Key, x => (OcelValue) x.Value));
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(v));
+                    return new OcelMap(m.Item.ToDictionary(x => x.Key, x => x.Value.FromFSharpOcelValue()));
             }
+
+            return v.IsOcelNull ? new OcelNull() : throw new ArgumentOutOfRangeException(nameof(v));
         }
 
 		/* --- EQUALITY MEMBERS --- */
@@ -471,4 +470,12 @@ namespace OCEL.CSharp
 	        return Values.GetHashCode();
         }
 	}
+
+    public class OcelNull : OcelValue
+    {
+        public override int GetHashCode()
+        {
+            return 0;
+        }
+    }
 }
