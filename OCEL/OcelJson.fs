@@ -146,7 +146,7 @@ module OcelJson =
         | _ -> jObj |> extractFromJObj
     
     /// <inheritdoc />
-    let serialize (formatting: OCEL.Types.Formatting) (log: OcelLog) : string =
+    let serialize formatting validate (log: OcelLog) =
         /// Get the value from the DU and put it into a JToken. Using reflection as FromObject handles the correct typing
         let rec createTokenFromOcelValue value =
             match value with
@@ -208,7 +208,7 @@ module OcelJson =
             | Types.Formatting.Indented -> Newtonsoft.Json.Formatting.Indented
             | _ -> raise (ArgumentOutOfRangeException(nameof(formatting)))
 
-        if not log.IsValid then
+        if validate && not log.IsValid then
             failwith "Log is invalid."
 
         let jObj = new JObject()

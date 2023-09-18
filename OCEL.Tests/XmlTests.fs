@@ -52,7 +52,7 @@ type XmlTests(output: ITestOutputHelper) =
     member _.``Can serialize nested XML`` () =
         let xml = File.ReadAllText("minimal_nested.xmlocel")
         let parsed = OcelXml.deserialize true xml
-        let serialized = OcelXml.serialize Formatting.Indented parsed
+        let serialized = OcelXml.serialize Formatting.Indented true parsed
         output.WriteLine $"Serialized XML:{Environment.NewLine}{serialized}"
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
@@ -60,7 +60,7 @@ type XmlTests(output: ITestOutputHelper) =
     member _.``Can serialize sample log`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         let parsed = xml |> OcelXml.deserialize true
-        let serialized = parsed |> OcelXml.serialize Formatting.Indented
+        let serialized = parsed |> OcelXml.serialize Formatting.Indented true
         output.WriteLine $"Serialized XML:{Environment.NewLine}{serialized}"
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
@@ -68,7 +68,7 @@ type XmlTests(output: ITestOutputHelper) =
     member _.``Can serialize "GitHub pm4pmy" log`` () =
         let xml = File.ReadAllText("github_pm4py.xmlocel")
         let parsed = xml |> OcelXml.deserialize true
-        let serialized = parsed |> OcelXml.serialize Formatting.Indented
+        let serialized = parsed |> OcelXml.serialize Formatting.Indented true
         output.WriteLine $"Serialized XML:{Environment.NewLine}{serialized}"
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
@@ -76,5 +76,5 @@ type XmlTests(output: ITestOutputHelper) =
     member _.``Can serialize sample log and deserialize it again`` () =
         let xml = File.ReadAllText("minimal.xmlocel")
         let log = xml |> OcelXml.deserialize true
-        let logReserialized = log |> OcelXml.serialize Formatting.Indented |> OcelXml.deserialize true
+        let logReserialized = log |> OcelXml.serialize Formatting.Indented true |> OcelXml.deserialize true
         log = logReserialized |> Assert.True

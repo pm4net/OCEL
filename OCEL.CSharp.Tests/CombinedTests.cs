@@ -21,7 +21,7 @@ namespace OCEL.CSharp.Tests
         {
             var json = File.ReadAllText("minimal.jsonocel");
             var log = OcelJson.Deserialize(json, true);
-            var xml = OcelXml.Serialize(log, Formatting.Indented);
+            var xml = OcelXml.Serialize(log, Formatting.Indented, true);
             var valid = OcelXml.Validate(xml);
             _output.WriteLine($"Serialized XML:{Environment.NewLine}{xml}");
             Assert.True(valid);
@@ -32,7 +32,7 @@ namespace OCEL.CSharp.Tests
         {
             var xml = File.ReadAllText("minimal.xmlocel");
             var log = OcelXml.Deserialize(xml, true);
-            var json = OcelJson.Serialize(log, Formatting.Indented);
+            var json = OcelJson.Serialize(log, Formatting.Indented, true);
             var valid = OcelJson.Validate(json);
             _output.WriteLine($"Serialized JSON:{Environment.NewLine}{json}");
             Assert.True(valid);
@@ -43,7 +43,7 @@ namespace OCEL.CSharp.Tests
         {
             var json = File.ReadAllText("minimal_nested.jsonocel");
             var log = OcelJson.Deserialize(json, true);
-            var xml = OcelXml.Serialize(log, Formatting.Indented);
+            var xml = OcelXml.Serialize(log, Formatting.Indented, true);
             var valid = OcelXml.Validate(xml);
             _output.WriteLine($"Serialized XML:{Environment.NewLine}{xml}");
             Assert.True(valid);
@@ -54,7 +54,7 @@ namespace OCEL.CSharp.Tests
         {
             var xml = File.ReadAllText("minimal_nested.xmlocel");
             var log = OcelXml.Deserialize(xml, true);
-            var json = OcelJson.Serialize(log, Formatting.Indented);
+            var json = OcelJson.Serialize(log, Formatting.Indented, true);
             var valid = OcelJson.Validate(json);
             _output.WriteLine($"Serialized JSON:{Environment.NewLine}{json}");
             Assert.True(valid);

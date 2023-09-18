@@ -220,7 +220,7 @@ module OcelXml =
             | _ -> xElm |> extractFromXElement
 
     /// <inheritdoc />
-    let serialize formatting (log: OcelLog) =
+    let serialize formatting validate (log: OcelLog) =
         /// Convert custom formatting enum to XML save options
         let toXmlSaveOptions formatting =
             match formatting with
@@ -327,7 +327,7 @@ module OcelXml =
             xElem
 
         // If the input log isn't valid, it shoudln't be possible to serialize it
-        if not log.IsValid then
+        if validate && not log.IsValid then
             failwith "Log is invalid."
 
         // Create the root document and add an XML declaration

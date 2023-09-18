@@ -36,9 +36,9 @@ namespace OCEL.CSharp
         /// <summary>
         /// Serialize an OCEL log into a JSON string.
         /// </summary>
-        public static string Serialize(OcelLog log, Types.Formatting formatting)
+        public static string Serialize(OcelLog log, Types.Formatting formatting, bool validate)
         {
-            return OCEL.OcelJson.serialize(formatting, log.ToFSharpOcelLog());
+            return OCEL.OcelJson.serialize(formatting, validate, log.ToFSharpOcelLog());
         }
     }
 }

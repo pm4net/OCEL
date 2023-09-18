@@ -57,7 +57,7 @@ type JsonTests(output: ITestOutputHelper) =
     member _.``Can serialize nested JSON`` () =
         let json = File.ReadAllText("minimal_nested.jsonocel")
         let parsed = OcelJson.deserialize true json
-        let serialized = OcelJson.serialize Formatting.Indented parsed
+        let serialized = OcelJson.serialize Formatting.Indented true parsed
         output.WriteLine $"Serialized JSON:{Environment.NewLine}{serialized}"
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
@@ -65,7 +65,7 @@ type JsonTests(output: ITestOutputHelper) =
     member _.``Can serialize sample log`` () =
         let json = File.ReadAllText("minimal.jsonocel")
         let parsed = json |> OcelJson.deserialize true
-        let serialized = parsed |> OcelJson.serialize Formatting.Indented
+        let serialized = parsed |> OcelJson.serialize Formatting.Indented true
         output.WriteLine $"Serialized JSON:{Environment.NewLine}{serialized}"
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
@@ -73,7 +73,7 @@ type JsonTests(output: ITestOutputHelper) =
     member _.``Can serialize "GitHub pm4pmy" log`` () =
         let json = File.ReadAllText("github_pm4py.jsonocel")
         let parsed = json |> OcelJson.deserialize true
-        let serialized = parsed |> OcelJson.serialize Formatting.Indented
+        let serialized = parsed |> OcelJson.serialize Formatting.Indented true
         output.WriteLine $"Serialized JSON:{Environment.NewLine}{serialized}"
         String.IsNullOrWhiteSpace serialized |> Assert.False
 
@@ -81,5 +81,5 @@ type JsonTests(output: ITestOutputHelper) =
     member _.``Can serialize sample log and deserialize it again`` () =
         let json = File.ReadAllText("minimal.jsonocel")
         let log = json |> OcelJson.deserialize true
-        let logReserialized = log |> OcelJson.serialize Formatting.Indented |> OcelJson.deserialize true
+        let logReserialized = log |> OcelJson.serialize Formatting.Indented true |> OcelJson.deserialize true
         log = logReserialized |> Assert.True

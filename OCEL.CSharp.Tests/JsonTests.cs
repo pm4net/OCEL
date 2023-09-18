@@ -74,7 +74,7 @@ namespace OCEL.CSharp.Tests
         {
             var json = File.ReadAllText("minimal_nested.jsonocel");
             var parsed = OcelJson.Deserialize(json, true);
-            var serialized = OcelJson.Serialize(parsed, Formatting.Indented);
+            var serialized = OcelJson.Serialize(parsed, Formatting.Indented, true);
             _output.WriteLine($"Serialized JSON:{Environment.NewLine}{serialized}");
             Assert.False(string.IsNullOrWhiteSpace(serialized));
         }
@@ -84,7 +84,7 @@ namespace OCEL.CSharp.Tests
         {
             var json = File.ReadAllText("minimal.jsonocel");
             var parsed = OcelJson.Deserialize(json, true);
-            var serialized = OcelJson.Serialize(parsed, Types.Formatting.Indented);
+            var serialized = OcelJson.Serialize(parsed, Types.Formatting.Indented, true);
             _output.WriteLine($"Serialized JSON:{Environment.NewLine}{serialized}");
             Assert.False(string.IsNullOrWhiteSpace(serialized));
         }
@@ -94,7 +94,7 @@ namespace OCEL.CSharp.Tests
         {
             var json = File.ReadAllText("github_pm4py.jsonocel");
             var parsed = OcelJson.Deserialize(json, true);
-            var serialized = OcelJson.Serialize(parsed, Types.Formatting.Indented);
+            var serialized = OcelJson.Serialize(parsed, Types.Formatting.Indented, true);
             _output.WriteLine($"Serialized JSON:{Environment.NewLine}{serialized}");
             Assert.False(string.IsNullOrWhiteSpace(serialized));
         }
@@ -104,7 +104,7 @@ namespace OCEL.CSharp.Tests
         {
             var json = File.ReadAllText("minimal.jsonocel");
             var parsed = OcelJson.Deserialize(json, true);
-            var serialized = OcelJson.Serialize(parsed, Types.Formatting.Indented);
+            var serialized = OcelJson.Serialize(parsed, Types.Formatting.Indented, true);
             var reSerialized = OcelJson.Deserialize(serialized, true);
             Assert.True(reSerialized.IsValid);
         }

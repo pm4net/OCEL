@@ -10,4 +10,4 @@ module OcelJson =
     /// Deserialize a JSON string into an OCEL log, and validate it against the OCEL schema.
     val deserialize : bool -> string -> OcelLog
     /// Serialize an OCEL log into a JSON string.
-    val serialize : Formatting -> OcelLog -> string
+    val serialize : Formatting -> bool -> OcelLog -> string

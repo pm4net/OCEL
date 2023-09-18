@@ -35,9 +35,9 @@ namespace OCEL.CSharp
         /// <summary>
         /// Serialize an OCEL log into a XML string.
         /// </summary>
-        public static string Serialize(OcelLog log, Types.Formatting formatting)
+        public static string Serialize(OcelLog log, Types.Formatting formatting, bool validate)
         {
-            return OCEL.OcelXml.serialize(formatting, log.ToFSharpOcelLog());
+            return OCEL.OcelXml.serialize(formatting, validate, log.ToFSharpOcelLog());
         }
     }
 }
