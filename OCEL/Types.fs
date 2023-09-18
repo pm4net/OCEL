@@ -112,31 +112,35 @@ type OcelLog with
     /// Merge duplicate objects and update the object ID's on the events that reference them.
     /// This is useful when the same object is repeatedly added without the ability to detect it efficiently, such as in logging.
     member this.MergeDuplicateObjects () =
+
         // Group by the object itself, and extract all ID's that reference this same object
-        let objs = this.Objects |> Map.toList |> List.groupBy snd |> List.map (fun (key, objs) -> objs |> List.map fst, key)
+        let uniqueObjsAndReferencingIds = this.Objects |> Map.toSeq |> Seq.groupBy snd |> Seq.map (fun (uniqueObj, objs) -> uniqueObj, objs |> Seq.map fst)
+        let uniqueObjsAndReferencingIdsMap = uniqueObjsAndReferencingIds |> Map.ofSeq
+
         // Create updated mapping where each object only appears once, and has the ID of the first encountered version of it
-        let updatedObjs = objs |> List.map (fun (ids, o) -> ids.Head, o) |> Map.ofList
+        let updatedObjs = uniqueObjsAndReferencingIds |> Seq.map (fun (o, ids) -> ids |> Seq.head, o) |> Map.ofSeq
 
         // Create updated event mapping where each object reference is updated to reflect the new ID of an object, in case it was removed due to duplication
         let updatedEvents =
             this.Events
-            |> Map.toList
-            |> List.map (fun (id, e) ->
-                id, 
+            |> Map.toSeq
+            |> Seq.map (fun (id, e) ->
+                id,
                 { e with 
                     OMap =
                         e.OMap
-                        |> List.map (fun o -> 
+                        |> List.choose (fun o ->
                             // For each object reference, find the list of objects that contains the ID. 
                             // Then simply take the first ID and use it, since we previously always picked the first ID for duplicate objects.
-                            objs 
-                            |> List.find (fun l -> fst l |> List.contains o) 
-                            |> fst 
-                            |> List.head
-                        )
+                            match this.Objects.TryFind o with
+                            | Some oldObj ->
+                                match uniqueObjsAndReferencingIdsMap.TryFind oldObj with
+                                | Some updatedObjIds -> updatedObjIds |> Seq.head |> Some
+                                | None -> None
+                            | None -> None)
                 }
             )
-            |> Map.ofList
+            |> Map.ofSeq
 
         { this with
             Events = updatedEvents
