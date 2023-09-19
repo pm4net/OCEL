@@ -151,35 +151,40 @@ type OcelLog with
     member this.ConvertObjectsToAttributes objectTypes =
 
         /// Add an object as attributes to all events that reference the object ID
-        let addObjectToEvents objId (obj: OcelObject) (log: OcelLog) =
-            { log with 
+        let addObjectsToEvents (objects: Map<string, OcelObject>) (log: OcelLog) =
+
+            // Already convert objects now as they are likely referenced by several events
+            let convertedObjs = objects |> Map.map (fun _ o ->
+                // If object only has one attribute, we don't need to use a map for it
+                match o.OvMap |> Map.count with
+                | 1 -> o.OvMap.Values |> Seq.head
+                | _ -> OcelMap(o.OvMap)
+            )
+
+            { log with
                 Events = 
-                    log.Events 
-                    |> Map.map (fun _ e -> 
-                        match e.OMap |> List.tryFindIndex (fun id -> id = objId) with
-                        | None -> e
-                        | Some i ->
-                            let attr = // If object only has one attribute, we don't need to use a map for it
-                                match obj.OvMap |> Map.toList with
-                                | [_, o] -> o
-                                | _ -> OcelMap(obj.OvMap)
-                            { e with 
-                                OMap = e.OMap |> List.removeAt i
-                                VMap = e.VMap |> Map.add obj.Type attr 
+                    log.Events
+                    |> Map.map (fun _ e ->
+                        let toConvert = e.OMap |> List.filter (fun o -> objects.ContainsKey o)
+                        match toConvert with
+                        | [] -> e
+                        | _ ->
+                            let updatedVMap = (e.VMap, toConvert) ||> List.fold (fun attrs objId -> attrs |> Map.add (objects[objId].Type) convertedObjs[objId])
+                            let updatedOMap = e.OMap |> List.except toConvert // Remove objects that were converted to attributes
+                            { e with
+                                OMap = updatedOMap
+                                VMap = updatedVMap
                             }
-                    )
+                        )
             }
 
-        /// Remove an object with some ID from the log
-        let removeObject objId log =
-            { log with Objects = log.Objects |> Map.remove objId }
-
-        /// Convert all instances of an object type to attributes in all referencing events
-        let convertObjectToAttributes objType (log: OcelLog) =
-            let objs = log.Objects |> Map.filter (fun _ o -> o.Type = objType) |> Map.toList
-            (log, objs) ||> List.fold (fun log (id, obj) -> log |> addObjectToEvents id obj |> removeObject id)
-
-        (this, objectTypes) ||> List.fold (fun log objType -> convertObjectToAttributes objType log)
+        /// Remove a map of objects from the log
+        let removeObjects (objects: Map<string, OcelObject>) (log: OcelLog) =
+            { log with Objects = (log.Objects, objects) ||> Map.fold (fun map objId _ -> map |> Map.remove objId) }
+        
+        let objTypes = objectTypes |> Set.ofList
+        let objsToConvert = this.Objects |> Map.filter (fun _ o -> objTypes |> Set.contains o.Type)
+        (objsToConvert, this) ||> addObjectsToEvents |> removeObjects objsToConvert
 
     /// Convert a list of attributes to objects by moving attributes to new objects and add references to the events.
     member this.ConvertAttributesToObjects attributes =
