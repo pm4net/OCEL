@@ -129,15 +129,15 @@ type OcelLog with
                 { e with 
                     OMap =
                         e.OMap
-                        |> List.choose (fun o ->
+                        |> List.map (fun o ->
                             // For each object reference, find the list of objects that contains the ID. 
                             // Then simply take the first ID and use it, since we previously always picked the first ID for duplicate objects.
                             match this.Objects.TryFind o with
                             | Some oldObj ->
                                 match uniqueObjsAndReferencingIdsMap.TryFind oldObj with
-                                | Some updatedObjIds -> updatedObjIds |> Seq.head |> Some
-                                | None -> None
-                            | None -> None)
+                                | Some updatedObjIds -> updatedObjIds |> Seq.head
+                                | None -> failwith $"Cannot find old object in map of updated objects. Object: {oldObj}"
+                            | None -> failwith $"Cannot find object with ID {o} in object map.")
                 }
             )
             |> Map.ofSeq
@@ -146,6 +146,15 @@ type OcelLog with
             Events = updatedEvents
             Objects = updatedObjs
         }
+
+    /// Remove object Id's from events that are not present in the log's object map.
+    member this.RemoveUnknownObjects () =
+
+        /// Remove the references in an event's object map that does not reference a known object
+        let removeUnknownObjects log e =
+            { e with OMap = e.OMap |> List.filter (fun o -> log.Objects |> Map.containsKey o) }
+
+        { this with Events = this.Events |> Map.map (fun _ e -> e |> removeUnknownObjects this) }
 
     /// Convert a list of object types to attributes by moving objects to all events that reference them.
     member this.ConvertObjectsToAttributes objectTypes =
