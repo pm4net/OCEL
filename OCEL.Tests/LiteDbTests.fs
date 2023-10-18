@@ -57,7 +57,7 @@ type LiteDbTests(output: ITestOutputHelper) =
 
     [<Fact>]
     member _.``Can deserialize basic log`` () =
-        let db = new LiteDatabase("Filename=minimal.db;ReadOnly=true")
+        let db = new LiteDatabase("Filename=..\..\..\..\..\..\data\OCEL\minimal.db;ReadOnly=true")
         let log = OCEL.OcelLiteDB.deserialize db
         log.IsValid |> Assert.True
 
