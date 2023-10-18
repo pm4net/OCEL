@@ -21,35 +21,5 @@
   <ItemGroup>
     <ProjectReference Include="..\OCEL.CSharp\OCEL.CSharp.csproj" />
   </ItemGroup>
-	
-  <ItemGroup>
-      <Content Include="..\Samples\minimal.jsonocel">
-	      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-	  <Content Include="..\Samples\minimal_nested.jsonocel">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-      <Content Include="..\Samples\minimal.xmlocel">
-	      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-	  <Content Include="..\Samples\minimal_nested.xmlocel">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="..\Samples\minimal.db">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="..\Samples\github_pm4py.jsonocel">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-      <Content Include="..\Samples\github_pm4py.xmlocel">
-	      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-	  <Content Include="..\Samples\github_pm4py.db">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="..\Samples\p2p.jsonocel">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-  </ItemGroup>
 
 </Project>
