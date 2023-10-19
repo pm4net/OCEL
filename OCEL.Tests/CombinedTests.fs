@@ -11,7 +11,7 @@ open LiteDB
 
 type CombinedTests(output: ITestOutputHelper) =
 
-    let dataPath = @"..\..\..\..\..\..\data\OCEL\"
+    let dataPath = Path.GetFullPath @"..\..\..\..\..\..\data\OCEL\"
 
     [<Fact>]
     member _.``Can convert sample OCEL-JSON to OCEL-XML`` () =
