@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,7 +62,8 @@ namespace OCEL.CSharp.Tests
         [Fact]
         public void CanDeserializeBasicLog()
         {
-            var db = new LiteDatabase(@"Filename=..\..\..\..\..\..\data\OCEL\minimal.db;ReadOnly=true");
+            var path = Path.GetFullPath(Path.Combine("..", "..", "..", "..", "..", "..", "data", "OCEL", "minimal.db"));
+            var db = new LiteDatabase($"Filename={path};ReadOnly=true");
             var log = OcelLiteDB.Deserialize(db);
             Assert.True(log.IsValid);
         }

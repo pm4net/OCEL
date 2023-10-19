@@ -4,6 +4,7 @@ open OCEL.Types
 
 open LiteDB
 open System
+open System.IO
 open Xunit
 open Xunit.Abstractions
 
@@ -57,7 +58,8 @@ type LiteDbTests(output: ITestOutputHelper) =
 
     [<Fact>]
     member _.``Can deserialize basic log`` () =
-        let db = new LiteDatabase("Filename=..\..\..\..\..\..\data\OCEL\minimal.db;ReadOnly=true")
+        let path = Path.Combine("..", "..", "..", "..", "..", "..", "data", "OCEL", "minimal.db") |> Path.GetFullPath
+        let db = new LiteDatabase($"Filename={path};ReadOnly=true")
         let log = OCEL.OcelLiteDB.deserialize db
         log.IsValid |> Assert.True
 
