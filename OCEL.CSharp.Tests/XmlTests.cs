@@ -8,7 +8,7 @@ namespace OCEL.CSharp.Tests
     public class XmlTests
     {
         private readonly ITestOutputHelper _output;
-        private readonly string _dataPath = Path.GetFullPath(@"..\..\..\..\..\..\data\OCEL\");
+        private readonly string _dataPath = Path.GetFullPath(Path.Combine("..", "..", "..", "..", "..", "..", "data", "OCEL"));
 
         public XmlTests(ITestOutputHelper output)
         {

@@ -9,7 +9,7 @@ namespace OCEL.CSharp.Tests
     public class JsonTests
     {
         private readonly ITestOutputHelper _output;
-        private readonly string _dataPath = Path.GetFullPath(@"..\..\..\..\..\..\data\OCEL\");
+        private readonly string _dataPath = Path.GetFullPath(Path.Combine("..", "..", "..", "..", "..", "..", "data", "OCEL"));
 
         public JsonTests(ITestOutputHelper output)
         {

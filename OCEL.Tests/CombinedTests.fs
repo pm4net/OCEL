@@ -11,10 +11,11 @@ open LiteDB
 
 type CombinedTests(output: ITestOutputHelper) =
 
-    let dataPath = Path.GetFullPath @"..\..\..\..\..\..\data\OCEL\"
+    let dataPath = Path.Combine("..", "..", "..", "..", "..", "..", "data", "OCEL") |> Path.GetFullPath
 
     [<Fact>]
     member _.``Can convert sample OCEL-JSON to OCEL-XML`` () =
+        output.WriteLine($"Searching for OCEL files in {dataPath}")
         let json = File.ReadAllText(Path.Combine(dataPath, "minimal.jsonocel"))
         let log = OcelJson.deserialize true json
         let xml = OcelXml.serialize Formatting.Indented true log
@@ -23,6 +24,7 @@ type CombinedTests(output: ITestOutputHelper) =
 
     [<Fact>]
     member _.``Can convert sample nested OCEL-JSON to OCEL-XML`` () =
+        output.WriteLine($"Searching for OCEL files in {dataPath}")
         let json = File.ReadAllText(Path.Combine(dataPath, "minimal_nested.jsonocel"))
         let log = OcelJson.deserialize true json
         let xml = OcelXml.serialize Formatting.Indented true log
@@ -31,6 +33,7 @@ type CombinedTests(output: ITestOutputHelper) =
 
     [<Fact>]
     member _.``Can convert sample OCEL-XML to OCEL-JSON`` () =
+        output.WriteLine($"Searching for OCEL files in {dataPath}")
         let xml = File.ReadAllText(Path.Combine(dataPath, "minimal.xmlocel"))
         let log = OcelXml.deserialize true xml
         let json = OcelJson.serialize Formatting.Indented true log
@@ -39,6 +42,7 @@ type CombinedTests(output: ITestOutputHelper) =
 
     [<Fact>]
     member _.``Can convert sample nested OCEL-XML to OCEL-JSON`` () =
+        output.WriteLine($"Searching for OCEL files in {dataPath}")
         let xml = File.ReadAllText(Path.Combine(dataPath, "minimal_nested.xmlocel"))
         let log = OcelXml.deserialize true xml
         let json = OcelJson.serialize Formatting.Indented true log
@@ -47,6 +51,7 @@ type CombinedTests(output: ITestOutputHelper) =
 
     [<Fact>]
     member _.``Can convert sample OCEL-JSON to LiteDB`` () =
+        output.WriteLine($"Searching for OCEL files in {dataPath}")
         let json = File.ReadAllText(Path.Combine(dataPath, "minimal.jsonocel"))
         let log = OcelJson.deserialize true json
         let liteDb = new LiteDatabase(":memory:")
@@ -54,6 +59,7 @@ type CombinedTests(output: ITestOutputHelper) =
 
     [<Fact>]
     member _.``Can convert sample OCEL-XML to LiteDB`` () =
+        output.WriteLine($"Searching for OCEL files in {dataPath}")
         let xml = File.ReadAllText(Path.Combine(dataPath, "minimal.xmlocel"))
         let log = OcelXml.deserialize true xml
         let liteDb = new LiteDatabase(":memory:")

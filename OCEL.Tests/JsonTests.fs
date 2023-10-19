@@ -10,7 +10,7 @@ open Xunit.Abstractions
 
 type JsonTests(output: ITestOutputHelper) =
 
-    let dataPath = Path.GetFullPath @"..\..\..\..\..\..\data\OCEL\"
+    let dataPath = Path.Combine("..", "..", "..", "..", "..", "..", "data", "OCEL") |> Path.GetFullPath
 
     [<Fact>]
     member _.``Sample JSON is valid according to schema`` () =

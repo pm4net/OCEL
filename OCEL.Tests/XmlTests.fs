@@ -10,7 +10,7 @@ open Xunit.Abstractions
 
 type XmlTests(output: ITestOutputHelper) =
 
-    let dataPath = Path.GetFullPath @"..\..\..\..\..\..\data\OCEL\"
+    let dataPath = Path.Combine("..", "..", "..", "..", "..", "..", "data", "OCEL") |> Path.GetFullPath
 
     [<Fact>]
     member _.``Sample XML is valid according to schema`` () =
